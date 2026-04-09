@@ -1,3 +1,9 @@
+//
+//  LoginView.swift
+//  SpendSense
+//
+//  Created by Yulani Alwis on 2026-04-02.
+//
 import SwiftUI
 import LocalAuthentication
 
