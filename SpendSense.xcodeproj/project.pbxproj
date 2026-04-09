@@ -1,0 +1,642 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 70;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5A1016032F7A570800CD5492 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1016022F7A570800CD5492 /* RootView.swift */; };
+		5ABD24562F7B85080027B0D1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5ABD24552F7B847A0027B0D1 /* GoogleService-Info.plist */; };
+		78ABA3702F80C3E70052FA6B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 78ABA36F2F80C3E70052FA6B /* FirebaseAuth */; };
+		78ABA3722F80C3EE0052FA6B /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 78ABA3712F80C3EE0052FA6B /* FirebaseCore */; };
+		78ABA3742F80C3F50052FA6B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 78ABA3732F80C3F50052FA6B /* FirebaseFirestore */; };
+		78ABA3E82F80EB3B0052FA6B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78ABA3E72F80EB3B0052FA6B /* WidgetKit.framework */; };
+		78ABA3EA2F80EB3B0052FA6B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78ABA3E92F80EB3B0052FA6B /* SwiftUI.framework */; };
+		78ABA3FB2F80EB3D0052FA6B /* SpendSenseWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A001 /* SpendSenseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F001 /* SpendSenseApp.swift */; };
+		A002 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F002 /* Theme.swift */; };
+		A012 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012 /* MainTabView.swift */; };
+		A021 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F021 /* AuthView.swift */; };
+		A022 /* AuthFeatureRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F022 /* AuthFeatureRow.swift */; };
+		A023 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F023 /* LoginView.swift */; };
+		A024 /* LoginInputRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F024 /* LoginInputRow.swift */; };
+		A025 /* CenteredSocialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F025 /* CenteredSocialButton.swift */; };
+		A026 /* ForgotPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F026 /* ForgotPasswordSheet.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		78ABA3F92F80EB3D0052FA6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PPROJ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 78ABA3E52F80EB3B0052FA6B;
+			remoteInfo = SpendSenseWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		78ABA4002F80EB3D0052FA6B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				78ABA3FB2F80EB3D0052FA6B /* SpendSenseWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		5A1016022F7A570800CD5492 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		5ABD24552F7B847A0027B0D1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SpendSenseWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		78ABA3E72F80EB3B0052FA6B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		78ABA3E92F80EB3B0052FA6B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		F001 /* SpendSenseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendSenseApp.swift; sourceTree = "<group>"; };
+		F002 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		F012 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		F021 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		F022 /* AuthFeatureRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFeatureRow.swift; sourceTree = "<group>"; };
+		F023 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		F024 /* LoginInputRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginInputRow.swift; sourceTree = "<group>"; };
+		F025 /* CenteredSocialButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenteredSocialButton.swift; sourceTree = "<group>"; };
+		F026 /* ForgotPasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordSheet.swift; sourceTree = "<group>"; };
+		FAPP /* SpendSense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpendSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5A10161D2F7A67ED00CD5492 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
+		5A10161E2F7A67ED00CD5492 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
+		78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SpendSenseWidget; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		78ABA3E32F80EB3B0052FA6B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78ABA3EA2F80EB3B0052FA6B /* SwiftUI.framework in Frameworks */,
+				78ABA3E82F80EB3B0052FA6B /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFRM /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78ABA3722F80C3EE0052FA6B /* FirebaseCore in Frameworks */,
+				78ABA3702F80C3E70052FA6B /* FirebaseAuth in Frameworks */,
+				78ABA3742F80C3F50052FA6B /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5A1016072F7A5C6E00CD5492 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				78ABA3E72F80EB3B0052FA6B /* WidgetKit.framework */,
+				78ABA3E92F80EB3B0052FA6B /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		GAPP /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F001 /* SpendSenseApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		GAUTH /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				F021 /* AuthView.swift */,
+				F022 /* AuthFeatureRow.swift */,
+				F023 /* LoginView.swift */,
+				F024 /* LoginInputRow.swift */,
+				F025 /* CenteredSocialButton.swift */,
+				F026 /* ForgotPasswordSheet.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		GMAIN /* SpendSense */ = {
+			isa = PBXGroup;
+			children = (
+				5A10161D2F7A67ED00CD5492 /* Services */,
+				5A10161E2F7A67ED00CD5492 /* ViewModels */,
+				GAPP /* App */,
+				GVIEWS /* Views */,
+				GRESOURCES /* Resources */,
+			);
+			path = SpendSense;
+			sourceTree = "<group>";
+		};
+		GPRODUCTS /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAPP /* SpendSense.app */,
+				78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		GRESOURCES /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F002 /* Theme.swift */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		GROOT = {
+			isa = PBXGroup;
+			children = (
+				GMAIN /* SpendSense */,
+				78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */,
+				5A1016072F7A5C6E00CD5492 /* Frameworks */,
+				GPRODUCTS /* Products */,
+				5ABD24552F7B847A0027B0D1 /* GoogleService-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		GVIEWS /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5A1016022F7A570800CD5492 /* RootView.swift */,
+				F012 /* MainTabView.swift */,
+				GAUTH /* Auth */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 78ABA3FD2F80EB3D0052FA6B /* Build configuration list for PBXNativeTarget "SpendSenseWidgetExtension" */;
+			buildPhases = (
+				78ABA3E22F80EB3B0052FA6B /* Sources */,
+				78ABA3E32F80EB3B0052FA6B /* Frameworks */,
+				78ABA3E42F80EB3B0052FA6B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */,
+			);
+			name = SpendSenseWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = SpendSenseWidgetExtension;
+			productReference = 78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		TTARGET /* SpendSense */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCLIST /* Build configuration list for PBXNativeTarget "SpendSense" */;
+			buildPhases = (
+				BSRC /* Sources */,
+				BFRM /* Frameworks */,
+				BRES /* Resources */,
+				78ABA4002F80EB3D0052FA6B /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				78ABA3FA2F80EB3D0052FA6B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5A10161D2F7A67ED00CD5492 /* Services */,
+				5A10161E2F7A67ED00CD5492 /* ViewModels */,
+			);
+			name = SpendSense;
+			packageProductDependencies = (
+				78ABA36F2F80C3E70052FA6B /* FirebaseAuth */,
+				78ABA3712F80C3EE0052FA6B /* FirebaseCore */,
+				78ABA3732F80C3F50052FA6B /* FirebaseFirestore */,
+			);
+			productName = SpendSense;
+			productReference = FAPP /* SpendSense.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		PPROJ /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					78ABA3E52F80EB3B0052FA6B = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					TTARGET = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = BCLISTP /* Build configuration list for PBXProject "SpendSense" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = GROOT;
+			packageReferences = (
+				78ABA36E2F80C3DA0052FA6B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = GPRODUCTS /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				TTARGET /* SpendSense */,
+				78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		78ABA3E42F80EB3B0052FA6B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BRES /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5ABD24562F7B85080027B0D1 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		78ABA3E22F80EB3B0052FA6B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BSRC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A1016032F7A570800CD5492 /* RootView.swift in Sources */,
+				A001 /* SpendSenseApp.swift in Sources */,
+				A002 /* Theme.swift in Sources */,
+				A012 /* MainTabView.swift in Sources */,
+				A021 /* AuthView.swift in Sources */,
+				A022 /* AuthFeatureRow.swift in Sources */,
+				A023 /* LoginView.swift in Sources */,
+				A024 /* LoginInputRow.swift in Sources */,
+				A025 /* CenteredSocialButton.swift in Sources */,
+				A026 /* ForgotPasswordSheet.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		78ABA3FA2F80EB3D0052FA6B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */;
+			targetProxy = 78ABA3F92F80EB3D0052FA6B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		78ABA3FE2F80EB3D0052FA6B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsense.app.SpendSenseWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		78ABA3FF2F80EB3D0052FA6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsense.app.SpendSenseWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BCDEBUG /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BCRELEASE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BCTDEBUG /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "SpendSense uses Face ID to protect sensitive financial settings.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SpendSense uses your location to alert you when entering high-spending areas.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsense.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		BCTRELEASE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "SpendSense uses Face ID to protect sensitive financial settings.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SpendSense uses your location to alert you when entering high-spending areas.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsense.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		78ABA3FD2F80EB3D0052FA6B /* Build configuration list for PBXNativeTarget "SpendSenseWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78ABA3FE2F80EB3D0052FA6B /* Debug */,
+				78ABA3FF2F80EB3D0052FA6B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCLIST /* Build configuration list for PBXNativeTarget "SpendSense" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCTDEBUG /* Debug */,
+				BCTRELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCLISTP /* Build configuration list for PBXProject "SpendSense" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCDEBUG /* Debug */,
+				BCRELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		78ABA36E2F80C3DA0052FA6B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		78ABA36F2F80C3E70052FA6B /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78ABA36E2F80C3DA0052FA6B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		78ABA3712F80C3EE0052FA6B /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78ABA36E2F80C3DA0052FA6B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		78ABA3732F80C3F50052FA6B /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78ABA36E2F80C3DA0052FA6B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = PPROJ /* Project object */;
+}
