@@ -1,3 +1,9 @@
+//
+//  AuthView.swift
+//  SpendSense
+//
+//  Created by Yulani Alwis on 2026-04-02.
+//
 import SwiftUI
 
 struct AuthView: View {
@@ -71,7 +77,7 @@ struct AuthView: View {
 
                 // CTA buttons
                 VStack(spacing: 14) {
-                    // Create account → Terms → Onboarding (email/pw collected on last onboarding step)
+                    // Create account ->Terms ->Onboarding (email/pw collected on last onboarding step)
                     Button {
                         withAnimation(.easeInOut(duration: 0.4)) {
                             appState.appPhase = .terms
