@@ -1,3 +1,9 @@
+//
+//  CenteredSocialButton.swift
+//  SpendSense
+//
+//  Created by Yulani Alwis on 2026-04-02.
+//
 import SwiftUI
 
 struct CenteredSocialButton: View {
@@ -19,7 +25,7 @@ struct CenteredSocialButton: View {
                     .font(SSFont.body(15, weight: .medium))
                     .foregroundColor(foreground)
             }
-            .frame(maxWidth: .infinity)          // centre the HStack
+            .frame(maxWidth: .infinity)          
             .frame(height: 52)
             .background(background)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))

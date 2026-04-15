@@ -2,11 +2,11 @@
 //  Theme.swift
 //  SpendSense
 //
-//  Created by Yulani Alwis on 2026-03-30.
+//  Created by Yulani Alwis on 2026-04-02.
 //
 import SwiftUI
 
-// MARK: - SpendSense Adaptive Color Palette (Light + Dark)
+//SpendSense Adaptive Color Palette (Light + Dark)
 extension Color {
     // Backgrounds – auto-adapt to color scheme
     static let ssBackground      = Color(UIColor { t in
@@ -79,7 +79,7 @@ extension Color {
     }
 }
 
-// MARK: - Typography
+// Typography
 struct SSFont {
     static func display(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
         .system(size: size, weight: weight, design: .rounded)
@@ -95,7 +95,7 @@ struct SSFont {
     }
 }
 
-// MARK: - Gradient Presets
+//  Gradient Presets
 extension LinearGradient {
     static let ssAccentGradient = LinearGradient(
         colors: [Color(hex: "#00E5B0"), Color(hex: "#00B8FF")],
@@ -114,7 +114,7 @@ extension LinearGradient {
         startPoint: .top, endPoint: .bottom)
 }
 
-// MARK: - iOS 26 Glass Card Modifier
+// iOS 26 Glass Card Modifier
 struct GlassCard: ViewModifier {
     @Environment(\.colorScheme) var scheme
 
