@@ -2,21 +2,12 @@
 //  FirebaseService.swift
 //  SpendSense
 //
-//  Handles Firebase Auth (sign-up / sign-in / sign-out) and
-//  Firestore sync for non-confidential user data.
-//
-//  Firestore schema  (all under /users/{uid}/)
-//    profile        → UserProfile document
-//    transactions   → sub-collection
-//    budgets        → sub-collection
-//    wishlist       → sub-collection
-//
 
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
-// MARK: - FirebaseService
+// FirebaseService
 
 final class FirebaseService {
 
@@ -24,10 +15,10 @@ final class FirebaseService {
     private let db = Firestore.firestore()
     private init() {}
 
-    // MARK: - Auth
+    //  Auth
 
-    /// Sign up a new user with email + password.
-    /// Returns the Firebase UID on success.
+    // Sign up a new user with email + password.
+    // Returns the Firebase UID on success.
     func signUp(email: String, password: String) async throws -> String {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
         return result.user.uid
@@ -44,13 +35,13 @@ final class FirebaseService {
         try Auth.auth().signOut()
     }
 
-    /// Current authenticated UID (nil if not signed in).
+    // Current authenticated UID (nil if not signed in).
     var currentUID: String? { Auth.auth().currentUser?.uid }
 
-    // MARK: - Profile
+    //  Profile
 
-    /// Upload non-confidential profile fields (name, income, savings goal, categories).
-    /// Password and other PII are never stored in Firestore.
+    // Upload non-confidential profile fields (name, income, savings goal, categories).
+    // Password and other PII are never stored in Firestore.
     func saveProfile(_ profile: UserProfileModel, uid: String) async throws {
         let data: [String: Any] = [
             "name":               profile.name,
@@ -62,7 +53,7 @@ final class FirebaseService {
         try await db.collection("users").document(uid).setData(data, merge: true)
     }
 
-    /// Download profile from Firestore. Returns nil if no document exists.
+    // Download profile from Firestore. Returns nil if no document exists.
     func fetchProfile(uid: String) async throws -> UserProfileModel? {
         let doc = try await db.collection("users").document(uid).getDocument()
         guard let d = doc.data() else { return nil }
@@ -84,7 +75,7 @@ final class FirebaseService {
         )
     }
 
-    // MARK: - Transactions
+    //  Transactions
 
     func saveTransaction(_ t: TransactionModel, uid: String) async throws {
         let data: [String: Any] = [
@@ -205,7 +196,7 @@ final class FirebaseService {
         }
     }
 
-    // MARK: - Bulk delete (for "Delete All Data")
+    // Bulk delete 
 
     func deleteAllUserData(uid: String) async throws {
         async let _ = deleteCollection("transactions", uid: uid)
