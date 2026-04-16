@@ -4,11 +4,9 @@
 //
 //  Created by Yulani Alwis on 2026-04-09.
 //
-
 import Foundation
 import SwiftUI
 
-// Spending Category
 enum SpendingCategory: String, CaseIterable, Codable, Identifiable {
     case food          = "Food & Dining"
     case transport     = "Transport"
@@ -17,6 +15,7 @@ enum SpendingCategory: String, CaseIterable, Codable, Identifiable {
     case health        = "Health"
     case utilities     = "Utilities"
     case education     = "Education"
+    case income        = "Income"
     case other         = "Other"
 
     var id: String { rawValue }
@@ -30,6 +29,7 @@ enum SpendingCategory: String, CaseIterable, Codable, Identifiable {
         case .health:        return "heart.fill"
         case .utilities:     return "bolt.fill"
         case .education:     return "book.fill"
+        case .income:        return "banknote.fill"
         case .other:         return "ellipsis.circle.fill"
         }
     }
@@ -43,12 +43,14 @@ enum SpendingCategory: String, CaseIterable, Codable, Identifiable {
         case .health:        return Color(hex: "#00E5B0")
         case .utilities:     return Color(hex: "#F97316")
         case .education:     return Color(hex: "#06B6D4")
+        case .income:        return Color(hex: "#22C55E")
         case .other:         return Color(hex: "#8A95B0")
         }
     }
+
+    var isExpenseCategory: Bool { self != .income }
 }
 
-// Transaction
 struct TransactionModel: Identifiable, Codable {
     let id: UUID
     var amount: Double
@@ -56,31 +58,33 @@ struct TransactionModel: Identifiable, Codable {
     var note: String
     var date: Date
     var isSimulated: Bool
+    var isIncome: Bool
 
     init(id: UUID = UUID(), amount: Double, category: SpendingCategory,
-         note: String = "", date: Date = Date(), isSimulated: Bool = false) {
-        self.id = id
-        self.amount = amount
-        self.category = category
-        self.note = note
-        self.date = date
+         note: String = "", date: Date = Date(),
+         isSimulated: Bool = false, isIncome: Bool = false) {
+        self.id         = id
+        self.amount     = amount
+        self.category   = category
+        self.note       = note
+        self.date       = date
         self.isSimulated = isSimulated
+        self.isIncome   = isIncome || category == .income
     }
 }
 
-// Budget
 struct BudgetModel: Identifiable, Codable {
     let id: UUID
-    var category: SpendingCategory?   // nil = global
+    var category: SpendingCategory?
     var limit: Double
     var period: BudgetPeriod
 
     init(id: UUID = UUID(), category: SpendingCategory? = nil,
          limit: Double, period: BudgetPeriod = .monthly) {
-        self.id = id
+        self.id       = id
         self.category = category
-        self.limit = limit
-        self.period = period
+        self.limit    = limit
+        self.period   = period
     }
 }
 
@@ -90,7 +94,6 @@ enum BudgetPeriod: String, CaseIterable, Codable {
     case monthly = "Monthly"
 }
 
-// Risk Level
 enum RiskLevel: String {
     case low      = "Low"
     case moderate = "Moderate"
@@ -112,7 +115,6 @@ enum RiskLevel: String {
     }
 }
 
-// Alert Item
 struct AlertItemModel: Identifiable {
     let id: UUID
     var title: String
@@ -123,12 +125,12 @@ struct AlertItemModel: Identifiable {
 
     init(id: UUID = UUID(), title: String, message: String,
          type: AlertType, date: Date = Date(), isRead: Bool = false) {
-        self.id = id
-        self.title = title
+        self.id      = id
+        self.title   = title
         self.message = message
-        self.type = type
-        self.date = date
-        self.isRead = isRead
+        self.type    = type
+        self.date    = date
+        self.isRead  = isRead
     }
 }
 
@@ -153,39 +155,37 @@ enum AlertType {
     }
 }
 
-// User Profile
 struct UserProfileModel: Codable {
     var name: String
     var email: String
     var monthlyIncome: Double
-    var savingsGoalPercent: Double  // 0-100
+    var savingsGoalPercent: Double
     var selectedCategories: [SpendingCategory]
     var firebaseUID: String?
 
     init(name: String = "", email: String = "",
          monthlyIncome: Double = 0, savingsGoalPercent: Double = 20,
-         selectedCategories: [SpendingCategory] = SpendingCategory.allCases,
+         selectedCategories: [SpendingCategory] = SpendingCategory.allCases.filter { $0.isExpenseCategory },
          firebaseUID: String? = nil) {
-        self.name = name
-        self.email = email
-        self.monthlyIncome = monthlyIncome
+        self.name               = name
+        self.email              = email
+        self.monthlyIncome      = monthlyIncome
         self.savingsGoalPercent = savingsGoalPercent
         self.selectedCategories = selectedCategories
-        self.firebaseUID = firebaseUID
+        self.firebaseUID        = firebaseUID
     }
 
     var savingsGoalAmount: Double { monthlyIncome * (savingsGoalPercent / 100) }
     var spendableAmount: Double   { monthlyIncome - savingsGoalAmount }
 }
 
-// Wishlist Item
 struct WishlistItemModel: Identifiable, Codable {
     let id: UUID
     var name: String
     var amount: Double
     var category: SpendingCategory
     var addedDate: Date
-    var waitUntil: Date   // impulse delay / savings end date
+    var waitUntil: Date
     var savingsDays: Int
     var savedAmount: Double
     var dailySavingsAmount: Double
@@ -193,21 +193,19 @@ struct WishlistItemModel: Identifiable, Codable {
 
     init(id: UUID = UUID(), name: String, amount: Double,
          category: SpendingCategory, waitDays: Int = 3) {
-        self.id = id
-        self.name = name
-        self.amount = amount
-        self.category = category
-        self.savingsDays = waitDays
-        self.savedAmount = 0
+        self.id                 = id
+        self.name               = name
+        self.amount             = amount
+        self.category           = category
+        self.savingsDays        = waitDays
+        self.savedAmount        = 0
         self.dailySavingsAmount = waitDays > 0 ? amount / Double(waitDays) : amount
-        self.addedDate = Date()
-        self.waitUntil = Calendar.current.date(byAdding: .day, value: waitDays, to: Date()) ?? Date()
-        self.lastDeductionDate = nil
+        self.addedDate          = Date()
+        self.waitUntil          = Calendar.current.date(byAdding: .day, value: waitDays, to: Date()) ?? Date()
+        self.lastDeductionDate  = nil
     }
 
-    var isReadyToPurchase: Bool {
-        Date() >= waitUntil || savedAmount >= amount
-    }
+    var isReadyToPurchase: Bool { Date() >= waitUntil || savedAmount >= amount }
 
     var daysRemaining: Int {
         max(0, Calendar.current.dateComponents([.day], from: Date(), to: waitUntil).day ?? 0)
@@ -222,8 +220,5 @@ struct WishlistItemModel: Identifiable, Codable {
         return min(savedAmount / amount, 1.0)
     }
 
-    var amountRemaining: Double {
-        max(0, amount - savedAmount)
-    }
+    var amountRemaining: Double { max(0, amount - savedAmount) }
 }
-

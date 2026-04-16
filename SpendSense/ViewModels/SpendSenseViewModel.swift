@@ -253,6 +253,19 @@ class SpendSenseViewModel: ObservableObject {
         updateWidgetData(lastCategory: category.rawValue)
     }
 
+    func addIncome(amount: Double, source: String) {
+        let t = TransactionModel(
+            amount: amount,
+            category: .income,
+            note: source,
+            isIncome: true
+        )
+        transactions.insert(t, at: 0)
+        try? store?.insertTransaction(t)
+
+        updateWidgetData(lastCategory: "Income")
+    }
+
     func addToWishlist(name: String, amount: Double, category: SpendingCategory, savingsDays: Int = 7) {
         let item = WishlistItemModel(name: name, amount: amount, category: category, waitDays: savingsDays)
         wishlist.append(item)
@@ -317,6 +330,7 @@ class SpendSenseViewModel: ObservableObject {
         let uid = userProfile.firebaseUID ?? firebase.currentUID ?? ""
         guard !uid.isEmpty else {
             clearLocalData()
+            userProfile = UserProfileModel() // Reset profile
             return
         }
 
@@ -341,35 +355,35 @@ class SpendSenseViewModel: ObservableObject {
             for w in wishlist {
                 try await firebase.saveWishlistItem(w, uid: uid)
             }
-        } catch {
-            print("[SpendSenseVM] Sync to Firebase failed: \(error)")
-        }
 
-        clearLocalData()
+            // 6  Finally, wipe local data
+            clearLocalData()
+            userProfile = UserProfileModel() // Reset profile
+        } catch {
+            print("[SpendSenseVM] Firebase sync error: \(error)")
+            // Still clear local data on failure to prevent merging inconsistent states
+            clearLocalData()
+            userProfile = UserProfileModel() // Reset profile
+        }
     }
 
-
+    /// Wipes all local Core Data entities.
     func clearLocalData() {
-        // CoreData wipe
-        try? store?.deleteAllTransactions()
-        try? store?.deleteAllBudgets()
-        try? store?.deleteAllWishlistItems()
-        try? store?.deleteAllProfiles()
-        try? store?.deleteAllAlerts()
-        try? store?.deleteAllPurchaseAttempts()
+        guard let store else { return }
+        try? store.deleteAllTransactions()
+        try? store.deleteAllBudgets()
+        try? store.deleteAllWishlistItems()
+        try? store.deleteAllAlerts()
+        try? store.deleteAllPurchaseAttempts()
+        try? store.deleteAllProfiles()
 
-        // In-memory wipe
         transactions = []
         budgets      = []
         wishlist     = []
         alerts       = []
-        userProfile  = UserProfileModel()
-
-        // Widget data wipe so the next user never sees stale numbers
-        WidgetDataStore.clearAll()
     }
 
-
+    // Delete all data (local and remote)
     func deleteAllData() {
         let uid = firebase.currentUID ?? ""
 

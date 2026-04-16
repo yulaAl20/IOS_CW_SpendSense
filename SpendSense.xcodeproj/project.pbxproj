@@ -24,6 +24,16 @@
 		A024 /* LoginInputRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F024 /* LoginInputRow.swift */; };
 		A025 /* CenteredSocialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F025 /* CenteredSocialButton.swift */; };
 		A026 /* ForgotPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F026 /* ForgotPasswordSheet.swift */; };
+		A031 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F031 /* SplashView.swift */; };
+		A032 /* TermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032 /* TermsView.swift */; };
+		A033 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F033 /* OnboardingView.swift */; };
+		A034 /* AlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F034 /* AlertsView.swift */; };
+		A035 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F035 /* BudgetView.swift */; };
+		A036 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F036 /* HomeView.swift */; };
+		A037 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F037 /* InsightsView.swift */; };
+		A038 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F038 /* SettingsView.swift */; };
+		A039 /* AddTransactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F039 /* AddTransactionSheet.swift */; };
+		A040 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* TransactionsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,10 +75,27 @@
 		F024 /* LoginInputRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginInputRow.swift; sourceTree = "<group>"; };
 		F025 /* CenteredSocialButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenteredSocialButton.swift; sourceTree = "<group>"; };
 		F026 /* ForgotPasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordSheet.swift; sourceTree = "<group>"; };
+		F031 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		F032 /* TermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsView.swift; sourceTree = "<group>"; };
+		F033 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		F034 /* AlertsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsView.swift; sourceTree = "<group>"; };
+		F035 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
+		F036 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		F037 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		F038 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F039 /* AddTransactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionSheet.swift; sourceTree = "<group>"; };
+		F040 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		FAPP /* SpendSense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpendSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		78264E042F9098D700B2624E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Untitled.swift,
+			);
+			target = TTARGET /* SpendSense */;
+		};
 		78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -79,8 +106,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5A10161D2F7A67ED00CD5492 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
+		5A10161D2F7A67ED00CD5492 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (78264E042F9098D700B2624E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
 		5A10161E2F7A67ED00CD5492 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
+		5A10161F2F7A67ED00CD5492 /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
 		78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SpendSenseWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -116,6 +144,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		GALT /* Alerts */ = {
+			isa = PBXGroup;
+			children = (
+				F034 /* AlertsView.swift */,
+			);
+			path = Alerts;
+			sourceTree = "<group>";
+		};
 		GAPP /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -137,16 +173,51 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
+		GBUD /* Budget */ = {
+			isa = PBXGroup;
+			children = (
+				F035 /* BudgetView.swift */,
+			);
+			path = Budget;
+			sourceTree = "<group>";
+		};
+		GHOM /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				F036 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		GINS /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				F037 /* InsightsView.swift */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
 		GMAIN /* SpendSense */ = {
 			isa = PBXGroup;
 			children = (
 				5A10161D2F7A67ED00CD5492 /* Services */,
 				5A10161E2F7A67ED00CD5492 /* ViewModels */,
+				5A10161F2F7A67ED00CD5492 /* Core */,
 				GAPP /* App */,
 				GVIEWS /* Views */,
 				GRESOURCES /* Resources */,
 			);
 			path = SpendSense;
+			sourceTree = "<group>";
+		};
+		GONB /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				F031 /* SplashView.swift */,
+				F032 /* TermsView.swift */,
+				F033 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		GPRODUCTS /* Products */ = {
@@ -177,12 +248,36 @@
 			);
 			sourceTree = "<group>";
 		};
+		GSET /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F038 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		GTRN /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				F039 /* AddTransactionSheet.swift */,
+				F040 /* TransactionsView.swift */,
+			);
+			path = Transactions;
+			sourceTree = "<group>";
+		};
 		GVIEWS /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				5A1016022F7A570800CD5492 /* RootView.swift */,
 				F012 /* MainTabView.swift */,
 				GAUTH /* Auth */,
+				GONB /* Onboarding */,
+				GALT /* Alerts */,
+				GBUD /* Budget */,
+				GHOM /* Home */,
+				GINS /* Insights */,
+				GSET /* Settings */,
+				GTRN /* Transactions */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -229,6 +324,7 @@
 			fileSystemSynchronizedGroups = (
 				5A10161D2F7A67ED00CD5492 /* Services */,
 				5A10161E2F7A67ED00CD5492 /* ViewModels */,
+				5A10161F2F7A67ED00CD5492 /* Core */,
 			);
 			name = SpendSense;
 			packageProductDependencies = (
@@ -320,6 +416,16 @@
 				A024 /* LoginInputRow.swift in Sources */,
 				A025 /* CenteredSocialButton.swift in Sources */,
 				A026 /* ForgotPasswordSheet.swift in Sources */,
+				A031 /* SplashView.swift in Sources */,
+				A032 /* TermsView.swift in Sources */,
+				A033 /* OnboardingView.swift in Sources */,
+				A034 /* AlertsView.swift in Sources */,
+				A035 /* BudgetView.swift in Sources */,
+				A036 /* HomeView.swift in Sources */,
+				A037 /* InsightsView.swift in Sources */,
+				A038 /* SettingsView.swift in Sources */,
+				A039 /* AddTransactionSheet.swift in Sources */,
+				A040 /* TransactionsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,7 +447,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
@@ -373,7 +479,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
@@ -522,7 +628,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";
@@ -553,7 +659,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";

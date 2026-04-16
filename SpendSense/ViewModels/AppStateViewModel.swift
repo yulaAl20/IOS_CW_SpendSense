@@ -4,10 +4,8 @@
 //
 //  Created by Yulani Alwis on 2026-04-09.
 //
-
 import SwiftUI
 import Combine
-
 
 class AppStateViewModel: ObservableObject {
     @Published var appPhase: AppPhase = .splash
@@ -16,8 +14,8 @@ class AppStateViewModel: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var selectedTab: TabItem = .home
     @Published var selectedAppearance: AppearanceMode = .dark
+    @Published var faceIDEnabled: Bool = UserDefaults.standard.bool(forKey: "faceIDEnabled")
 
-    // Transient: set during sign-up, consumed when onboarding completes
     var pendingEmail: String = ""
     var pendingPassword: String = ""
     var pendingFirebaseUID: String = ""
@@ -34,33 +32,38 @@ class AppStateViewModel: ObservableObject {
 
     func acceptTerms() {
         hasAcceptedTerms = true
-        withAnimation(.easeInOut(duration: 0.5)) {
-            appPhase = .onboarding
-        }
+        withAnimation(.easeInOut(duration: 0.5)) { appPhase = .onboarding }
     }
 
     func completeOnboarding() {
         hasCompletedOnboarding = true
-        login()   // auto log-in after finishing sign-up flow
+        login()
     }
 
     func login() {
         isLoggedIn = true
         selectedTab = .home
-        withAnimation(.easeInOut(duration: 0.5)) {
-            appPhase = .main
-        }
+        withAnimation(.easeInOut(duration: 0.5)) { appPhase = .main }
     }
+
     func logout() {
         isLoggedIn = false
         selectedTab = .home
-        withAnimation(.easeInOut(duration: 0.5)) {
-            appPhase = .auth
-        }
+        withAnimation(.easeInOut(duration: 0.5)) { appPhase = .auth }
+    }
+
+    func enableFaceID(uid: String, email: String) {
+        KeychainService.shared.saveCredentials(uid: uid, email: email)
+        faceIDEnabled = true
+        UserDefaults.standard.set(true, forKey: "faceIDEnabled")
+    }
+
+    func disableFaceID() {
+        KeychainService.shared.clearCredentials()
+        faceIDEnabled = false
+        UserDefaults.standard.set(false, forKey: "faceIDEnabled")
     }
 }
-
-//AppearanceMode
 
 enum AppearanceMode: String, CaseIterable, Identifiable {
     case dark, light, system
@@ -90,8 +93,6 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
         }
     }
 }
-
-// tabItem
 
 enum TabItem: String, CaseIterable {
     case home      = "Home"

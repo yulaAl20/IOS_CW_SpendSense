@@ -14,6 +14,8 @@ struct SettingsView: View {
     @EnvironmentObject var appState: AppStateViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var showProfile       = false
+    @State private var showWishlist      = false
+    @State private var showSyncBackups   = false
     @State private var showEditBudget    = false
     @State private var showChangePass    = false
     @State private var showMail          = false
@@ -61,14 +63,14 @@ struct SettingsView: View {
                             SSNavRow(icon: "heart.fill", iconColor: .ssWarning,
                                      label: "Wishlist",
                                      detail: "\(vm.wishlist.count) items") {
-                                showProfile = true
+                                showWishlist = true
                             }
                             SSRowDivider()
                             SSNavRow(icon: "arrow.triangle.2.circlepath.icloud.fill",
                                      iconColor: .ssInfo,
                                      label: "Sync & Backups",
                                      detail: "Up to date") {
-                                showProfile = true
+                                showSyncBackups = true
                             }
                         }
                         .padding(.horizontal, 20)
@@ -168,6 +170,12 @@ struct SettingsView: View {
             // Sheets
             .sheet(isPresented: $showProfile) {
                 ProfileSettingsView().environmentObject(vm)
+            }
+            .sheet(isPresented: $showWishlist) {
+                WishlistSheet().environmentObject(vm)
+            }
+            .sheet(isPresented: $showSyncBackups) {
+                SyncBackupsSheet()
             }
             .sheet(isPresented: $showEditBudget) {
                 EditBudgetSheet(
@@ -900,7 +908,12 @@ struct ProfileSettingsView: View {
 
     @State private var name: String  = ""
     @State private var email: String = ""
+    @State private var monthlyIncome: String = ""
+    @State private var savingsGoalPercent: String = ""
+
     @State private var showSaved     = false
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
 
     var body: some View {
         NavigationView {
@@ -916,7 +929,7 @@ struct ProfileSettingsView: View {
                     .padding(.top, 8)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle("Personal Details")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -954,6 +967,13 @@ struct ProfileSettingsView: View {
             .onAppear {
                 name  = vm.userProfile.name
                 email = vm.userProfile.email
+                monthlyIncome = vm.userProfile.monthlyIncome == 0 ? "" : String(vm.userProfile.monthlyIncome)
+                savingsGoalPercent = String(vm.userProfile.savingsGoalPercent)
+            }
+            .alert("Invalid details", isPresented: $showValidationAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(validationMessage)
             }
         }
     }
@@ -988,19 +1008,69 @@ struct ProfileSettingsView: View {
     }
 
     private var editSection: some View {
-        SSSettingsSection(title: "Edit Profile") {
+        SSSettingsSection(title: "Personal Details") {
             ProfileInputRow(icon: "person.fill", iconColor: .ssAccent,
                             label: "Name", placeholder: "Your name", text: $name)
             SSRowDivider()
             ProfileInputRow(icon: "envelope.fill", iconColor: .ssInfo,
-                            label: "Email", placeholder: "your@email.com", text: $email)
+                            label: "Email", placeholder: "your@email.com", text: $email, keyboardType: .emailAddress)
+            SSRowDivider()
+            ProfileInputRow(icon: "banknote.fill", iconColor: .ssSuccess,
+                            label: "Monthly Income", placeholder: "0", text: $monthlyIncome, keyboardType: .decimalPad)
+            SSRowDivider()
+            ProfileInputRow(icon: "target", iconColor: .ssViolet,
+                            label: "Savings Goal (%)", placeholder: "20", text: $savingsGoalPercent, keyboardType: .numberPad)
         }
     }
 
     private func saveProfile() {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedIncome = monthlyIncome.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedGoal = savingsGoalPercent.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else {
+            validationMessage = "Name can’t be empty."
+            showValidationAlert = true
+            return
+        }
+
+        guard !trimmedEmail.isEmpty else {
+            validationMessage = "Email can’t be empty."
+            showValidationAlert = true
+            return
+        }
+
+        guard trimmedEmail.contains("@"), trimmedEmail.contains(".") else {
+            validationMessage = "Please enter a valid email address."
+            showValidationAlert = true
+            return
+        }
+
         var updated = vm.userProfile
-        if !name.isEmpty  { updated.name  = name  }
-        if !email.isEmpty { updated.email = email }
+        updated.name = trimmedName
+        updated.email = trimmedEmail
+
+        if !trimmedIncome.isEmpty {
+            let cleanedIncome = trimmedIncome.replacingOccurrences(of: ",", with: "")
+            guard let incomeValue = Double(cleanedIncome), incomeValue >= 0 else {
+                validationMessage = "Monthly income must be a number greater than or equal to 0."
+                showValidationAlert = true
+                return
+            }
+            updated.monthlyIncome = incomeValue
+        }
+
+        if !trimmedGoal.isEmpty {
+            let cleanedGoal = trimmedGoal.replacingOccurrences(of: "%", with: "")
+            guard let goalValue = Double(cleanedGoal), (0.0...100.0).contains(goalValue) else {
+                validationMessage = "Savings goal must be between 0 and 100."
+                showValidationAlert = true
+                return
+            }
+            updated.savingsGoalPercent = goalValue
+        }
+
         vm.updateUserProfile(updated)
         withAnimation(.spring(response: 0.4)) { showSaved = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -1017,7 +1087,22 @@ struct ProfileInputRow: View {
     let label: String
     let placeholder: String
     @Binding var text: String
+    let keyboardType: UIKeyboardType
     @Environment(\.colorScheme) var scheme
+
+    init(icon: String,
+         iconColor: Color,
+         label: String,
+         placeholder: String,
+         text: Binding<String>,
+         keyboardType: UIKeyboardType = .default) {
+        self.icon = icon
+        self.iconColor = iconColor
+        self.label = label
+        self.placeholder = placeholder
+        self._text = text
+        self.keyboardType = keyboardType
+    }
 
     var body: some View {
         HStack(spacing: 14) {
@@ -1037,6 +1122,7 @@ struct ProfileInputRow: View {
                     .font(SSFont.body(15))
                     .foregroundColor(.ssTextPrimary)
                     .accentColor(.ssAccent)
+                    .keyboardType(keyboardType)
             }
         }
         .padding(.horizontal, 16)

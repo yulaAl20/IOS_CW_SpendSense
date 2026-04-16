@@ -3,7 +3,6 @@
 //  SpendSense
 //
 //  Created by Yulani Alwis on 2026-04-09.
-//
 import SwiftUI
 import Combine
 
@@ -11,17 +10,19 @@ class AddTransactionViewModel: ObservableObject {
     @Published var amount: String = ""
     @Published var selectedCategory: SpendingCategory = .food
     @Published var note: String = ""
-    @Published var mode: Mode = .spend         
+    @Published var mode: Mode = .spend
     @Published var simulationResult: SimulationResult? = nil
     @Published var showSimulation: Bool = false
 
-    // Wishlist
     @Published var wishlistName: String = ""
     @Published var showWishlistAdd: Bool = false
-    @Published var savingsDays: Int = 7  
+    @Published var savingsDays: Int = 7
+
+    @Published var incomeSource: String = ""
 
     enum Mode: String, CaseIterable {
         case spend    = "Spend"
+        case income   = "Income"
         case simulate = "Simulate"
         case wishlist = "Wishlist"
     }
@@ -30,9 +31,9 @@ class AddTransactionViewModel: ObservableObject {
         Double(amount.replacingOccurrences(of: ",", with: "")) ?? 0
     }
 
-    var isValid: Bool {
-        amountDouble > 0
-    }
+    var isValid: Bool { amountDouble > 0 }
+
+    var isIncomeValid: Bool { amountDouble > 0 }
 
     func runSimulation(using vm: SpendSenseViewModel) {
         guard isValid else { return }
@@ -46,20 +47,29 @@ class AddTransactionViewModel: ObservableObject {
         reset()
     }
 
+    func confirmIncome(using vm: SpendSenseViewModel) {
+        guard isIncomeValid else { return }
+        let src = incomeSource.isEmpty ? "Extra income" : incomeSource
+        vm.addIncome(amount: amountDouble, source: src)
+        reset()
+    }
+
     func addToWishlist(using vm: SpendSenseViewModel) {
         guard isValid, !wishlistName.isEmpty else { return }
-        vm.addToWishlist(name: wishlistName, amount: amountDouble, category: selectedCategory, savingsDays: savingsDays)
+        vm.addToWishlist(name: wishlistName, amount: amountDouble,
+                         category: selectedCategory, savingsDays: savingsDays)
         reset()
     }
 
     func reset() {
-        amount = ""
-        note = ""
+        amount       = ""
+        note         = ""
+        incomeSource = ""
         wishlistName = ""
-        savingsDays = 7
+        savingsDays  = 7
         simulationResult = nil
-        showSimulation = false
-        showWishlistAdd = false
+        showSimulation   = false
+        showWishlistAdd  = false
     }
 
     var dailySavingsPreview: Double {

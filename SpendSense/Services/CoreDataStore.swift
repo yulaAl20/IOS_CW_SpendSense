@@ -4,7 +4,6 @@
 //
 //  Created by Yulani Alwis on 2026-04-09.
 //
-
 import Foundation
 import CoreData
 
@@ -20,29 +19,36 @@ final class CoreDataStore {
         self.context = context
     }
 
-    //Transactions
+    private func attributeExists(_ key: String, in object: NSManagedObject) -> Bool {
+        object.entity.attributesByName[key] != nil
+    }
 
     func fetchTransactions() throws -> [TransactionModel] {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Transaction")
         request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
 
-        let objects = try context.fetch(request)
-        return objects.compactMap { obj in
+        return try context.fetch(request).compactMap { obj in
             guard
-                let id = obj.value(forKey: "id") as? UUID,
-                let amount = obj.value(forKey: "amount") as? Double,
+                let id          = obj.value(forKey: "id") as? UUID,
+                let amount      = obj.value(forKey: "amount") as? Double,
                 let categoryRaw = obj.value(forKey: "category") as? String,
-                let category = SpendingCategory(rawValue: categoryRaw),
-                let date = obj.value(forKey: "date") as? Date
-            else {
-                return nil
+                let category    = SpendingCategory(rawValue: categoryRaw),
+                let date        = obj.value(forKey: "date") as? Date
+            else { return nil }
+
+            let note      = (obj.value(forKey: "note") as? String) ?? ""
+            let isImpulse = (obj.value(forKey: "isImpulse") as? Bool) ?? false
+            let isIncome: Bool
+            if attributeExists("isIncome", in: obj) {
+                isIncome = (obj.value(forKey: "isIncome") as? Bool) ?? (category == .income)
+            } else {
+                // Backward compatibility for stores created before isIncome existed.
+                isIncome = (category == .income)
             }
 
-            let note = (obj.value(forKey: "note") as? String) ?? ""
-
-            let isImpulse = (obj.value(forKey: "isImpulse") as? Bool) ?? false
-
-            return TransactionModel(id: id, amount: amount, category: category, note: note, date: date, isSimulated: isImpulse)
+            return TransactionModel(id: id, amount: amount, category: category,
+                                    note: note, date: date,
+                                    isSimulated: isImpulse, isIncome: isIncome)
         }
     }
 
@@ -51,41 +57,37 @@ final class CoreDataStore {
         guard let entity else { throw StoreError.missingEntity("Transaction") }
 
         let obj = NSManagedObject(entity: entity, insertInto: context)
-        obj.setValue(model.id, forKey: "id")
-        obj.setValue(model.amount, forKey: "amount")
-        obj.setValue(model.category.rawValue, forKey: "category")
-        obj.setValue(model.note, forKey: "note")
-        obj.setValue(model.date, forKey: "date")
-        obj.setValue(model.isSimulated, forKey: "isImpulse")
+        obj.setValue(model.id,                  forKey: "id")
+        obj.setValue(model.amount,              forKey: "amount")
+        obj.setValue(model.category.rawValue,   forKey: "category")
+        obj.setValue(model.note,                forKey: "note")
+        obj.setValue(model.date,                forKey: "date")
+        obj.setValue(model.isSimulated,         forKey: "isImpulse")
+        if attributeExists("isIncome", in: obj) {
+            obj.setValue(model.isIncome, forKey: "isIncome")
+        }
 
         try saveIfNeeded()
     }
 
-    func deleteAllTransactions() throws {
-        try batchDelete(entityName: "Transaction")
-    }
-
-    //  Budgets
+    func deleteAllTransactions() throws { try batchDelete(entityName: "Transaction") }
 
     func fetchBudgets() throws -> [BudgetModel] {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Budget")
         request.sortDescriptors = [NSSortDescriptor(key: "lastUpdated", ascending: false)]
 
-        let objects = try context.fetch(request)
-        return objects.compactMap { obj in
+        return try context.fetch(request).compactMap { obj in
             let id = (obj.value(forKey: "id") as? UUID) ?? UUID()
             let categoryRaw = obj.value(forKey: "category") as? String
             let category = categoryRaw.flatMap { SpendingCategory(rawValue: $0) }
 
-            // Core Data has monthlyLimit/weeklyLimit/dailyLimit rather than (limit, period)
             let monthly = (obj.value(forKey: "monthlyLimit") as? Double) ?? 0
-            let weekly = (obj.value(forKey: "weeklyLimit") as? Double) ?? 0
-            let daily = (obj.value(forKey: "dailyLimit") as? Double) ?? 0
+            let weekly  = (obj.value(forKey: "weeklyLimit")  as? Double) ?? 0
+            let daily   = (obj.value(forKey: "dailyLimit")   as? Double) ?? 0
 
             if monthly > 0 { return BudgetModel(id: id, category: category, limit: monthly, period: .monthly) }
-            if weekly > 0 { return BudgetModel(id: id, category: category, limit: weekly, period: .weekly) }
-            if daily > 0 { return BudgetModel(id: id, category: category, limit: daily, period: .daily) }
-
+            if weekly  > 0 { return BudgetModel(id: id, category: category, limit: weekly,  period: .weekly)  }
+            if daily   > 0 { return BudgetModel(id: id, category: category, limit: daily,   period: .daily)   }
             return nil
         }
     }
@@ -93,12 +95,9 @@ final class CoreDataStore {
     func upsertBudget(category: SpendingCategory?, period: BudgetPeriod, limit: Double) throws {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Budget")
         request.fetchLimit = 1
-
-        if let category {
-            request.predicate = NSPredicate(format: "category == %@", category.rawValue)
-        } else {
-            request.predicate = NSPredicate(format: "category == nil")
-        }
+        request.predicate = category != nil
+            ? NSPredicate(format: "category == %@", category!.rawValue)
+            : NSPredicate(format: "category == nil")
 
         let existing = try context.fetch(request).first
 
@@ -113,56 +112,48 @@ final class CoreDataStore {
             obj.setValue(category?.rawValue, forKey: "category")
         }
 
-  
         obj.setValue(0.0, forKey: "monthlyLimit")
         obj.setValue(0.0, forKey: "weeklyLimit")
         obj.setValue(0.0, forKey: "dailyLimit")
 
         switch period {
         case .monthly: obj.setValue(limit, forKey: "monthlyLimit")
-        case .weekly: obj.setValue(limit, forKey: "weeklyLimit")
-        case .daily: obj.setValue(limit, forKey: "dailyLimit")
+        case .weekly:  obj.setValue(limit, forKey: "weeklyLimit")
+        case .daily:   obj.setValue(limit, forKey: "dailyLimit")
         }
 
         obj.setValue(Date(), forKey: "lastUpdated")
-
         try saveIfNeeded()
     }
 
-    func deleteAllBudgets() throws {
-        try batchDelete(entityName: "Budget")
-    }
-
+    func deleteAllBudgets() throws { try batchDelete(entityName: "Budget") }
 
     func fetchWishlistItems() throws -> [WishlistItemModel] {
         let request = NSFetchRequest<NSManagedObject>(entityName: "WishlistItem")
         request.sortDescriptors = [NSSortDescriptor(key: "addedDate", ascending: false)]
 
-        let objects = try context.fetch(request)
-        return objects.compactMap { obj in
+        return try context.fetch(request).compactMap { obj in
             guard
-                let id = obj.value(forKey: "id") as? UUID,
-                let name = obj.value(forKey: "itemName") as? String,
-                let price = obj.value(forKey: "price") as? Double,
+                let id          = obj.value(forKey: "id") as? UUID,
+                let name        = obj.value(forKey: "itemName") as? String,
+                let price       = obj.value(forKey: "price") as? Double,
                 let categoryRaw = obj.value(forKey: "category") as? String,
-                let category = SpendingCategory(rawValue: categoryRaw),
-                let addedDate = obj.value(forKey: "addedDate") as? Date,
-                let delayUntil = obj.value(forKey: "delayUntil") as? Date
-            else {
-                return nil
-            }
+                let category    = SpendingCategory(rawValue: categoryRaw),
+                let addedDate   = obj.value(forKey: "addedDate") as? Date,
+                let delayUntil  = obj.value(forKey: "delayUntil") as? Date
+            else { return nil }
 
-            let savingsDays = (obj.value(forKey: "savingsDays") as? Int) ?? 3
-            let savedAmount = (obj.value(forKey: "savedAmount") as? Double) ?? 0
+            let savingsDays        = (obj.value(forKey: "savingsDays") as? Int) ?? 3
+            let savedAmount        = (obj.value(forKey: "savedAmount") as? Double) ?? 0
             let dailySavingsAmount = (obj.value(forKey: "dailySavingsAmount") as? Double) ?? (savingsDays > 0 ? price / Double(savingsDays) : price)
-            let lastDeductionDate = obj.value(forKey: "lastDeductionDate") as? Date
+            let lastDeductionDate  = obj.value(forKey: "lastDeductionDate") as? Date
 
             var model = WishlistItemModel(id: id, name: name, amount: price, category: category, waitDays: savingsDays)
-            model.addedDate = addedDate
-            model.waitUntil = delayUntil
-            model.savedAmount = savedAmount
+            model.addedDate          = addedDate
+            model.waitUntil          = delayUntil
+            model.savedAmount        = savedAmount
             model.dailySavingsAmount = dailySavingsAmount
-            model.lastDeductionDate = lastDeductionDate
+            model.lastDeductionDate  = lastDeductionDate
             return model
         }
     }
@@ -172,17 +163,17 @@ final class CoreDataStore {
         guard let entity else { throw StoreError.missingEntity("WishlistItem") }
 
         let obj = NSManagedObject(entity: entity, insertInto: context)
-        obj.setValue(model.id, forKey: "id")
-        obj.setValue(model.name, forKey: "itemName")
-        obj.setValue(model.amount, forKey: "price")
-        obj.setValue(model.category.rawValue, forKey: "category")
-        obj.setValue(model.addedDate, forKey: "addedDate")
-        obj.setValue(model.waitUntil, forKey: "delayUntil")
-        obj.setValue(model.savingsDays, forKey: "savingsDays")
-        obj.setValue(model.savedAmount, forKey: "savedAmount")
-        obj.setValue(model.dailySavingsAmount, forKey: "dailySavingsAmount")
-        obj.setValue(model.lastDeductionDate, forKey: "lastDeductionDate")
-        obj.setValue("active", forKey: "status")
+        obj.setValue(model.id,                  forKey: "id")
+        obj.setValue(model.name,                forKey: "itemName")
+        obj.setValue(model.amount,              forKey: "price")
+        obj.setValue(model.category.rawValue,   forKey: "category")
+        obj.setValue(model.addedDate,           forKey: "addedDate")
+        obj.setValue(model.waitUntil,           forKey: "delayUntil")
+        obj.setValue(model.savingsDays,         forKey: "savingsDays")
+        obj.setValue(model.savedAmount,         forKey: "savedAmount")
+        obj.setValue(model.dailySavingsAmount,  forKey: "dailySavingsAmount")
+        obj.setValue(model.lastDeductionDate,   forKey: "lastDeductionDate")
+        obj.setValue("active",                  forKey: "status")
 
         try saveIfNeeded()
     }
@@ -193,40 +184,31 @@ final class CoreDataStore {
         request.fetchLimit = 1
 
         guard let obj = try context.fetch(request).first else { return }
-        obj.setValue(model.savedAmount, forKey: "savedAmount")
-        obj.setValue(model.lastDeductionDate, forKey: "lastDeductionDate")
+        obj.setValue(model.savedAmount,        forKey: "savedAmount")
+        obj.setValue(model.lastDeductionDate,  forKey: "lastDeductionDate")
         obj.setValue(model.dailySavingsAmount, forKey: "dailySavingsAmount")
 
         try saveIfNeeded()
     }
 
-    func deleteAllWishlistItems() throws {
-        try batchDelete(entityName: "WishlistItem")
-    }
-
-    // Profile
+    func deleteAllWishlistItems() throws { try batchDelete(entityName: "WishlistItem") }
 
     func fetchUserProfile() throws -> UserProfileModel? {
         let request = NSFetchRequest<NSManagedObject>(entityName: "UserProfile")
         request.fetchLimit = 1
         guard let obj = try context.fetch(request).first else { return nil }
 
-        let name               = (obj.value(forKey: "name") as? String) ?? ""
-        let email              = (obj.value(forKey: "email") as? String) ?? ""
-        let monthlyIncome      = (obj.value(forKey: "monthlyIncome") as? Double) ?? 0
-        let savingsGoal        = (obj.value(forKey: "savingsGoal") as? Double) ?? 0
-        let categoriesRaw      = (obj.value(forKey: "selectedCategories") as? String) ?? ""
+        let name          = (obj.value(forKey: "name") as? String) ?? ""
+        let email         = (obj.value(forKey: "email") as? String) ?? ""
+        let monthlyIncome = (obj.value(forKey: "monthlyIncome") as? Double) ?? 0
+        let savingsGoal   = (obj.value(forKey: "savingsGoal") as? Double) ?? 0
+        let categoriesRaw = (obj.value(forKey: "selectedCategories") as? String) ?? ""
         let categories: [SpendingCategory] = categoriesRaw.isEmpty
-            ? SpendingCategory.allCases
+            ? SpendingCategory.allCases.filter { $0.isExpenseCategory }
             : categoriesRaw.split(separator: ",").compactMap { SpendingCategory(rawValue: String($0)) }
 
-        return UserProfileModel(
-            name: name,
-            email: email,
-            monthlyIncome: monthlyIncome,
-            savingsGoalPercent: savingsGoal,
-            selectedCategories: categories
-        )
+        return UserProfileModel(name: name, email: email, monthlyIncome: monthlyIncome,
+                                savingsGoalPercent: savingsGoal, selectedCategories: categories)
     }
 
     func upsertUserProfile(_ profile: UserProfileModel) throws {
@@ -255,39 +237,32 @@ final class CoreDataStore {
         try saveIfNeeded()
     }
 
-    func deleteAllProfiles() throws {
-        try batchDelete(entityName: "UserProfile")
-    }
-
-    //  Alerts
+    func deleteAllProfiles() throws { try batchDelete(entityName: "UserProfile") }
 
     func fetchAlerts() throws -> [AlertItemModel] {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Alert")
         request.sortDescriptors = [NSSortDescriptor(key: "triggerTime", ascending: false)]
 
-        let objects = try context.fetch(request)
-        return objects.compactMap { obj in
+        return try context.fetch(request).compactMap { obj in
             guard
-                let id = obj.value(forKey: "id") as? UUID,
-                let title = (obj.value(forKey: "type") as? String),
-                let message = (obj.value(forKey: "message") as? String),
-                let date = (obj.value(forKey: "triggerTime") as? Date)
-            else {
-                return nil
-            }
+                let id      = obj.value(forKey: "id") as? UUID,
+                let title   = obj.value(forKey: "type") as? String,
+                let message = obj.value(forKey: "message") as? String,
+                let date    = obj.value(forKey: "triggerTime") as? Date
+            else { return nil }
 
-            // Map stored type string to a known AlertType.
             let alertType: AlertType
             switch title.lowercased() {
             case "budgetwarning", "budget warning": alertType = .budgetWarning
             case "locationalert", "location alert": alertType = .locationAlert
-            case "impulsecheck", "impulse check": alertType = .impulseCheck
-            case "milestone": alertType = .milestone
-            default: alertType = .budgetWarning
+            case "impulsecheck",  "impulse check":  alertType = .impulseCheck
+            case "milestone":                        alertType = .milestone
+            default:                                 alertType = .budgetWarning
             }
 
             let wasActionTaken = (obj.value(forKey: "wasActionTaken") as? Bool) ?? false
-            return AlertItemModel(id: id, title: title, message: message, type: alertType, date: date, isRead: wasActionTaken)
+            return AlertItemModel(id: id, title: title, message: message,
+                                  type: alertType, date: date, isRead: wasActionTaken)
         }
     }
 
@@ -296,23 +271,18 @@ final class CoreDataStore {
         guard let entity else { throw StoreError.missingEntity("Alert") }
 
         let obj = NSManagedObject(entity: entity, insertInto: context)
-        obj.setValue(model.id, forKey: "id")
+        obj.setValue(model.id,      forKey: "id")
         obj.setValue(model.message, forKey: "message")
-        obj.setValue(model.date, forKey: "triggerTime")
-        obj.setValue(model.title, forKey: "type")
-        obj.setValue(model.isRead, forKey: "wasActionTaken")
+        obj.setValue(model.date,    forKey: "triggerTime")
+        obj.setValue(model.title,   forKey: "type")
+        obj.setValue(model.isRead,  forKey: "wasActionTaken")
 
         try saveIfNeeded()
     }
 
-    func deleteAllAlerts() throws {
-        try batchDelete(entityName: "Alert")
-    }
+    func deleteAllAlerts() throws { try batchDelete(entityName: "Alert") }
 
-    func deleteAllPurchaseAttempts() throws {
-        try batchDelete(entityName: "PurchaseAttempt")
-    }
-
+    func deleteAllPurchaseAttempts() throws { try batchDelete(entityName: "PurchaseAttempt") }
 
     private func saveIfNeeded() throws {
         guard context.hasChanges else { return }

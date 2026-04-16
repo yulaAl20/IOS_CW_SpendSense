@@ -11,7 +11,7 @@ struct InsightsView: View {
     @State private var selectedPeriod: BudgetPeriod = .weekly
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
 

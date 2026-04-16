@@ -20,7 +20,7 @@ struct RootView: View {
             switch appState.appPhase {
             case .splash:
                 SplashView()
-                    .transition(.opacity)
+                    .transition(AnyTransition.opacity)
             case .terms:
                 TermsView()
                     .transition(.asymmetric(

@@ -2,12 +2,9 @@
 //  FirebaseService.swift
 //  SpendSense
 //
-
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
-
-// FirebaseService
 
 final class FirebaseService {
 
@@ -15,33 +12,26 @@ final class FirebaseService {
     private let db = Firestore.firestore()
     private init() {}
 
-    //  Auth
-
-    // Sign up a new user with email + password.
-    // Returns the Firebase UID on success.
     func signUp(email: String, password: String) async throws -> String {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
         return result.user.uid
     }
 
-    /// Sign in an existing user.
     func signIn(email: String, password: String) async throws -> String {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         return result.user.uid
     }
 
-    /// Sign out.
+    func sendPasswordReset(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+
     func signOut() throws {
         try Auth.auth().signOut()
     }
 
-    // Current authenticated UID (nil if not signed in).
     var currentUID: String? { Auth.auth().currentUser?.uid }
 
-    //  Profile
-
-    // Upload non-confidential profile fields (name, income, savings goal, categories).
-    // Password and other PII are never stored in Firestore.
     func saveProfile(_ profile: UserProfileModel, uid: String) async throws {
         let data: [String: Any] = [
             "name":               profile.name,
@@ -53,7 +43,6 @@ final class FirebaseService {
         try await db.collection("users").document(uid).setData(data, merge: true)
     }
 
-    // Download profile from Firestore. Returns nil if no document exists.
     func fetchProfile(uid: String) async throws -> UserProfileModel? {
         let doc = try await db.collection("users").document(uid).getDocument()
         guard let d = doc.data() else { return nil }
@@ -66,16 +55,12 @@ final class FirebaseService {
         let categories         = categoriesRaw.compactMap { SpendingCategory(rawValue: $0) }
 
         return UserProfileModel(
-            name: name,
-            email: email,
-            monthlyIncome: monthlyIncome,
+            name: name, email: email, monthlyIncome: monthlyIncome,
             savingsGoalPercent: savingsGoalPercent,
-            selectedCategories: categories.isEmpty ? SpendingCategory.allCases : categories,
+            selectedCategories: categories.isEmpty ? SpendingCategory.allCases.filter { $0.isExpenseCategory } : categories,
             firebaseUID: uid
         )
     }
-
-    //  Transactions
 
     func saveTransaction(_ t: TransactionModel, uid: String) async throws {
         let data: [String: Any] = [
@@ -84,7 +69,8 @@ final class FirebaseService {
             "category":  t.category.rawValue,
             "note":      t.note,
             "date":      Timestamp(date: t.date),
-            "isImpulse": t.isSimulated
+            "isImpulse": t.isSimulated,
+            "isIncome":  t.isIncome
         ]
         try await db.collection("users").document(uid)
             .collection("transactions").document(t.id.uuidString).setData(data)
@@ -108,8 +94,10 @@ final class FirebaseService {
             else { return nil }
             let note      = d["note"] as? String ?? ""
             let isImpulse = d["isImpulse"] as? Bool ?? false
+            let isIncome  = d["isIncome"]  as? Bool ?? (category == .income)
             return TransactionModel(id: id, amount: amount, category: category,
-                                    note: note, date: ts.dateValue(), isSimulated: isImpulse)
+                                    note: note, date: ts.dateValue(),
+                                    isSimulated: isImpulse, isIncome: isIncome)
         }
     }
 
@@ -117,8 +105,6 @@ final class FirebaseService {
         try await db.collection("users").document(uid)
             .collection("transactions").document(id.uuidString).delete()
     }
-
-    // MARK: - Budgets
 
     func saveBudget(_ b: BudgetModel, uid: String) async throws {
         let data: [String: Any] = [
@@ -149,18 +135,16 @@ final class FirebaseService {
         }
     }
 
-    // MARK: - Wishlist
-
     func saveWishlistItem(_ item: WishlistItemModel, uid: String) async throws {
         let data: [String: Any] = [
-            "id":        item.id.uuidString,
-            "name":      item.name,
-            "amount":    item.amount,
-            "category":  item.category.rawValue,
-            "addedDate": Timestamp(date: item.addedDate),
-            "waitUntil": Timestamp(date: item.waitUntil),
-            "savingsDays": item.savingsDays,
-            "savedAmount": item.savedAmount,
+            "id":                item.id.uuidString,
+            "name":              item.name,
+            "amount":            item.amount,
+            "category":          item.category.rawValue,
+            "addedDate":         Timestamp(date: item.addedDate),
+            "waitUntil":         Timestamp(date: item.waitUntil),
+            "savingsDays":       item.savingsDays,
+            "savedAmount":       item.savedAmount,
             "dailySavingsAmount": item.dailySavingsAmount
         ]
         try await db.collection("users").document(uid)
@@ -183,20 +167,18 @@ final class FirebaseService {
                 let waitTs  = d["waitUntil"] as? Timestamp
             else { return nil }
 
-            let savingsDays = (d["savingsDays"] as? Int) ?? 3
-            let savedAmount = (d["savedAmount"] as? Double) ?? 0
+            let savingsDays        = (d["savingsDays"] as? Int) ?? 3
+            let savedAmount        = (d["savedAmount"] as? Double) ?? 0
             let dailySavingsAmount = (d["dailySavingsAmount"] as? Double) ?? (savingsDays > 0 ? amount / Double(savingsDays) : amount)
 
             var item = WishlistItemModel(id: id, name: name, amount: amount, category: cat, waitDays: savingsDays)
-            item.addedDate = addedTs.dateValue()
-            item.waitUntil = waitTs.dateValue()
-            item.savedAmount = savedAmount
+            item.addedDate          = addedTs.dateValue()
+            item.waitUntil          = waitTs.dateValue()
+            item.savedAmount        = savedAmount
             item.dailySavingsAmount = dailySavingsAmount
             return item
         }
     }
-
-    // Bulk delete 
 
     func deleteAllUserData(uid: String) async throws {
         async let _ = deleteCollection("transactions", uid: uid)
@@ -207,8 +189,6 @@ final class FirebaseService {
 
     private func deleteCollection(_ name: String, uid: String) async throws {
         let snap = try await db.collection("users").document(uid).collection(name).getDocuments()
-        for doc in snap.documents {
-            try await doc.reference.delete()
-        }
+        for doc in snap.documents { try await doc.reference.delete() }
     }
 }

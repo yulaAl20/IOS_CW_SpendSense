@@ -12,7 +12,7 @@ struct BudgetView: View {
     @State private var selectedPeriod: BudgetPeriod = .monthly
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
 
@@ -82,7 +82,7 @@ struct BudgetView: View {
 struct GlobalBudgetCard: View {
     @EnvironmentObject var vm: SpendSenseViewModel
     var period: BudgetPeriod
-    @State private var animateProgress = false
+    @State private var displayedProgress: Double = 0
 
     var spent: Double {
         switch period {
@@ -114,24 +114,40 @@ struct GlobalBudgetCard: View {
         VStack(spacing: 0) {
             // Header gradient
             VStack(spacing: 16) {
-                HStack {
+                HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(period.rawValue) Limit")
+                        Text("Spent")
                             .font(SSFont.body(13))
                             .foregroundColor(.ssTextSecondary)
-                        Text(vm.formatCurrency(limit))
-                            .font(SSFont.mono(28, weight: .bold))
+                        Text(vm.formatCurrency(spent))
+                            .font(SSFont.mono(24, weight: .bold))
                             .foregroundColor(.ssTextPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
-                    Spacer()
+
+                    Spacer(minLength: 12)
+
                     VStack(alignment: .trailing, spacing: 4) {
                         Text("Remaining")
                             .font(SSFont.body(13))
                             .foregroundColor(.ssTextSecondary)
                         Text(vm.formatCurrency(max(0, limit - spent)))
-                            .font(SSFont.mono(22, weight: .bold))
+                            .font(SSFont.mono(24, weight: .bold))
                             .foregroundColor(riskColor)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
+                }
+
+                HStack {
+                    Text("\(period.rawValue) Limit")
+                        .font(SSFont.body(12))
+                        .foregroundColor(.ssTextTertiary)
+                    Spacer()
+                    Text(vm.formatCurrency(limit))
+                        .font(SSFont.mono(12, weight: .semibold))
+                        .foregroundColor(.ssTextSecondary)
                 }
 
                 // Progress bar
@@ -143,14 +159,13 @@ struct GlobalBudgetCard: View {
                                 .frame(height: 10)
                             Capsule()
                                 .fill(riskColor)
-                                .frame(width: geo.size.width * (animateProgress ? progress : 0), height: 10)
-                                .animation(.easeOut(duration: 0.9).delay(0.2), value: animateProgress)
+                                .frame(width: geo.size.width * displayedProgress, height: 10)
                         }
                     }
                     .frame(height: 10)
 
                     HStack {
-                        Text("Rs. 0")
+                        Text(vm.formatCurrency(0))
                         Spacer()
                         Text("\(Int(progress * 100))% used")
                             .font(SSFont.body(12, weight: .semibold))
@@ -167,7 +182,17 @@ struct GlobalBudgetCard: View {
         .background(Color.ssSurfaceElevated)
         .cornerRadius(20)
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.ssBorder, lineWidth: 1))
-        .onAppear { animateProgress = true }
+        .onAppear {
+            displayedProgress = 0
+            withAnimation(.easeOut(duration: 0.9)) {
+                displayedProgress = progress
+            }
+        }
+        .onChange(of: progress) { newValue in
+            withAnimation(.easeOut(duration: 0.6)) {
+                displayedProgress = newValue
+            }
+        }
     }
 }
 
@@ -177,6 +202,7 @@ struct CategoryBudgetCard: View {
     var limit: Double?
     var spent: Double
     var vm: SpendSenseViewModel
+    @State private var displayedProgress: Double = 0
 
     var progress: Double {
         guard let l = limit, l > 0 else { return 0 }
@@ -234,8 +260,7 @@ struct CategoryBudgetCard: View {
                         Capsule().fill(Color.ssBorder).frame(height: 5)
                         Capsule()
                             .fill(statusColor)
-                            .frame(width: geo.size.width * progress, height: 5)
-                            .animation(.easeOut(duration: 0.7), value: progress)
+                            .frame(width: geo.size.width * displayedProgress, height: 5)
                     }
                 }
                 .frame(height: 5)
@@ -245,6 +270,17 @@ struct CategoryBudgetCard: View {
         .background(Color.ssSurface)
         .cornerRadius(14)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.ssBorder, lineWidth: 1))
+        .onAppear {
+            displayedProgress = 0
+            withAnimation(.easeOut(duration: 0.7)) {
+                displayedProgress = progress
+            }
+        }
+        .onChange(of: progress) { newValue in
+            withAnimation(.easeOut(duration: 0.7)) {
+                displayedProgress = newValue
+            }
+        }
     }
 }
 

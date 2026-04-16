@@ -39,6 +39,7 @@
         <attribute name="category" optional="YES" attributeType="String"/>
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isIncome" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isImpulse" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="locationTag" optional="YES" attributeType="String"/>
         <attribute name="note" optional="YES" attributeType="String"/>

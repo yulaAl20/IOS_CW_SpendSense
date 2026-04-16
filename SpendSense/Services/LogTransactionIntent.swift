@@ -4,12 +4,9 @@
 //
 //  Created by Yulani Alwis on 2026-04-09.
 //
-
 import AppIntents
 import CoreData
 import WidgetKit
-
-//  Category Entity for App Intents
 
 struct SpendingCategoryEntity: AppEntity {
     static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Spending Category")
@@ -25,23 +22,23 @@ struct SpendingCategoryEntity: AppEntity {
     static let allCategories: [SpendingCategoryEntity] = SpendingCategory.allCases.map {
         SpendingCategoryEntity(id: $0.rawValue, displayName: $0.rawValue)
     }
+
+    static let expenseCategories: [SpendingCategoryEntity] = SpendingCategory.allCases
+        .filter { $0.isExpenseCategory }
+        .map { SpendingCategoryEntity(id: $0.rawValue, displayName: $0.rawValue) }
 }
 
 struct SpendingCategoryQuery: EntityQuery {
     func entities(for identifiers: [String]) async throws -> [SpendingCategoryEntity] {
         SpendingCategoryEntity.allCategories.filter { identifiers.contains($0.id) }
     }
-
     func suggestedEntities() async throws -> [SpendingCategoryEntity] {
-        SpendingCategoryEntity.allCategories
+        SpendingCategoryEntity.expenseCategories
     }
-
     func defaultResult() async -> SpendingCategoryEntity? {
-        SpendingCategoryEntity.allCategories.first
+        SpendingCategoryEntity.expenseCategories.first
     }
 }
-
-// Log Transaction Intent
 
 struct LogTransactionIntent: AppIntent {
 
@@ -51,62 +48,35 @@ struct LogTransactionIntent: AppIntent {
         categoryName: "Finance"
     )
 
-    // Parameters -siri
+    @IntentParameter(title: "Amount") var amount: Double
+    @IntentParameter(title: "Category") var category: SpendingCategoryEntity
+    @IntentParameter(title: "Note", default: "Logged via Siri") var note: String
 
-    @IntentParameter(title: "Amount")
-    var amount: Double
-
-    @IntentParameter(title: "Category")
-    var category: SpendingCategoryEntity
-
-    @IntentParameter(title: "Note", default: "Logged via Siri")
-    var note: String
-// function
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
 
-        // SpendingCategory 
         guard let spendingCategory = SpendingCategory(rawValue: category.id) else {
             return .result(dialog: "Sorry, I couldn't find that category.")
         }
 
-        //  Core Data context
         let context = PersistenceController.shared.container.viewContext
-
-        // Core ml impulse-risk prediction
         let risk = ImpulseRiskPredictor.shared.predictRisk(
-            amount: amount,
-            category: spendingCategory.rawValue,
-            context: context
-        )
+            amount: amount, category: spendingCategory.rawValue, context: context)
 
-        // save on coredata
         let store = CoreDataStore(context: context)
-        let transaction = TransactionModel(
-            amount: amount,
-            category: spendingCategory,
-            note: note
-        )
+        let transaction = TransactionModel(amount: amount, category: spendingCategory, note: note)
         try store.insertTransaction(transaction)
 
-        //  Record the purchase attempt
         recordPurchaseAttempt(context: context, amount: amount,
-                              category: spendingCategory.rawValue,
-                              riskScore: risk.score)
+                              category: spendingCategory.rawValue, riskScore: risk.score)
 
-        //  Fire notification if risk is elevated
         if risk.score >= 0.5 {
             SpendSenseNotificationService.shared.sendImpulseWarning(
-                amount: amount,
-                category: spendingCategory.rawValue,
-                riskScore: risk.score
-            )
+                amount: amount, category: spendingCategory.rawValue, riskScore: risk.score)
         }
 
-        //Reload widget timeline
         WidgetCenter.shared.reloadAllTimelines()
 
-        //Build Siri response
         let formatted = "Rs.\(Int(amount))"
         let riskEmoji: String
         switch risk.level {
@@ -119,12 +89,8 @@ struct LogTransactionIntent: AppIntent {
         return .result(dialog: "\(dialog)")
     }
 
-    // Helpers
-
     private func recordPurchaseAttempt(context: NSManagedObjectContext,
-                                        amount: Double,
-                                        category: String,
-                                        riskScore: Double) {
+                                        amount: Double, category: String, riskScore: Double) {
         guard let entity = NSEntityDescription.entity(forEntityName: "PurchaseAttempt", in: context) else { return }
         let obj = NSManagedObject(entity: entity, insertInto: context)
         obj.setValue(UUID(),    forKey: "id")
@@ -138,7 +104,77 @@ struct LogTransactionIntent: AppIntent {
     }
 }
 
-// Check Budget Intent
+struct AddExpenseIntent: AppIntent {
+
+    static var title: LocalizedStringResource = "Add Expense"
+    static var description = IntentDescription(
+        "Quickly add a new expense to SpendSense.",
+        categoryName: "Finance"
+    )
+    static var openAppWhenRun: Bool = false
+
+    @IntentParameter(title: "Amount") var amount: Double
+    @IntentParameter(title: "Category") var category: SpendingCategoryEntity
+    @IntentParameter(title: "Note", default: "Quick expense") var note: String
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+
+        guard let spendingCategory = SpendingCategory(rawValue: category.id) else {
+            return .result(dialog: "Unknown category. Please try again.")
+        }
+
+        let context = PersistenceController.shared.container.viewContext
+        let store   = CoreDataStore(context: context)
+
+        let tx = TransactionModel(amount: amount, category: spendingCategory, note: note)
+        try store.insertTransaction(tx)
+
+        let risk = ImpulseRiskPredictor.shared.predictRisk(
+            amount: amount, category: spendingCategory.rawValue, context: context)
+
+        if risk.score >= 0.5 {
+            SpendSenseNotificationService.shared.sendImpulseWarning(
+                amount: amount, category: spendingCategory.rawValue, riskScore: risk.score)
+        }
+
+        WidgetCenter.shared.reloadAllTimelines()
+
+        let formatted = "Rs.\(Int(amount))"
+        return .result(dialog: "Done! \(formatted) added to \(spendingCategory.rawValue).")
+    }
+}
+
+struct AddIncomeIntent: AppIntent {
+
+    static var title: LocalizedStringResource = "Add Income"
+    static var description = IntentDescription(
+        "Log extra income in SpendSense — freelance, bonuses, gifts, etc.",
+        categoryName: "Finance"
+    )
+    static var openAppWhenRun: Bool = false
+
+    @IntentParameter(title: "Amount") var amount: Double
+    @IntentParameter(title: "Source", default: "Extra income") var source: String
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+
+        let context = PersistenceController.shared.container.viewContext
+        let store   = CoreDataStore(context: context)
+
+        let tx = TransactionModel(
+            amount: amount, category: .income,
+            note: source, isIncome: true
+        )
+        try store.insertTransaction(tx)
+
+        WidgetCenter.shared.reloadAllTimelines()
+
+        let formatted = "Rs.\(Int(amount))"
+        return .result(dialog: "Nice! \(formatted) income logged as \(source).")
+    }
+}
 
 struct CheckBudgetIntent: AppIntent {
 
@@ -160,30 +196,32 @@ struct CheckBudgetIntent: AppIntent {
         let now = Date()
 
         let monthlySpent = transactions
-            .filter { !$0.isSimulated && calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
+            .filter { !$0.isSimulated && !$0.isIncome &&
+                calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
             .reduce(0) { $0 + $1.amount }
 
         let monthlyLimit = budgets
-            .first(where: { $0.category == nil && $0.period == .monthly })?
-            .limit ?? 0
+            .first(where: { $0.category == nil && $0.period == .monthly })?.limit ?? 0
 
         let todaySpent = transactions
-            .filter { !$0.isSimulated && calendar.isDateInToday($0.date) }
+            .filter { !$0.isSimulated && !$0.isIncome && calendar.isDateInToday($0.date) }
+            .reduce(0) { $0 + $1.amount }
+
+        let todayIncome = transactions
+            .filter { $0.isIncome && calendar.isDateInToday($0.date) }
             .reduce(0) { $0 + $1.amount }
 
         let pct = monthlyLimit > 0 ? Int(monthlySpent / monthlyLimit * 100) : 0
         let remaining = max(0, monthlyLimit - monthlySpent)
 
-        let response = """
-        You've spent Rs.\(Int(monthlySpent)) this month (\(pct)% of budget). \
-        Rs.\(Int(remaining)) remaining. Today: Rs.\(Int(todaySpent)).
-        """
+        var response = "You've spent Rs.\(Int(monthlySpent)) this month (\(pct)% of budget). Rs.\(Int(remaining)) remaining. Today: Rs.\(Int(todaySpent))."
+        if todayIncome > 0 {
+            response += " Income today: Rs.\(Int(todayIncome))."
+        }
 
         return .result(dialog: "\(response)")
     }
 }
-
-//  Shortcuts Provider
 
 struct SpendSenseShortcutsProvider: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
@@ -197,6 +235,16 @@ struct SpendSenseShortcutsProvider: AppShortcutsProvider {
             ],
             shortTitle: "Log a Spend",
             systemImageName: "plus.circle.fill"
+        )
+        AppShortcut(
+            intent: AddIncomeIntent(),
+            phrases: [
+                "Add income in \(.applicationName)",
+                "Log income in \(.applicationName)",
+                "I received money in \(.applicationName)"
+            ],
+            shortTitle: "Add Income",
+            systemImageName: "banknote.fill"
         )
         AppShortcut(
             intent: CheckBudgetIntent(),
