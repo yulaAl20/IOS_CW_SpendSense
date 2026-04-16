@@ -26,6 +26,30 @@ final class FirebaseService {
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
 
+    func verifyPasswordResetCode(_ code: String) async throws -> String {
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<String, Error>) in
+            Auth.auth().verifyPasswordResetCode(code) { email, error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume(returning: email ?? "")
+                }
+            }
+        }
+    }
+
+    func confirmPasswordReset(code: String, newPassword: String) async throws {
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+            Auth.auth().confirmPasswordReset(withCode: code, newPassword: newPassword) { error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume(returning: ())
+                }
+            }
+        }
+    }
+
     func signOut() throws {
         try Auth.auth().signOut()
     }
