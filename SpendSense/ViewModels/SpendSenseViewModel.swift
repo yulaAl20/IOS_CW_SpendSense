@@ -20,10 +20,36 @@ class SpendSenseViewModel: ObservableObject {
 
     private let store   : CoreDataStore?
     private let firebase = FirebaseService.shared
+    private var cancellables = Set<AnyCancellable>()
 
     init(context: NSManagedObjectContext? = nil) {
         self.store = context.map { CoreDataStore(context: $0) }
         loadFromCoreData()
+
+        NotificationCenter.default.publisher(for: .spendSenseInAppAlert)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] note in
+                guard let self else { return }
+                guard
+                    let title = note.userInfo?["title"] as? String,
+                    let message = note.userInfo?["message"] as? String,
+                    let typeRaw = note.userInfo?["type"] as? String
+                else { return }
+
+                let type: AlertType
+                switch typeRaw {
+                case "budgetWarning": type = .budgetWarning
+                case "locationAlert": type = .locationAlert
+                case "impulseCheck": type = .impulseCheck
+                case "milestone": type = .milestone
+                default: type = .milestone
+                }
+
+                let alert = AlertItemModel(title: title, message: message, type: type)
+                self.alerts.insert(alert, at: 0)
+                try? self.store?.insertAlert(alert)
+            }
+            .store(in: &cancellables)
     }
 
     // Load from CoreData 
@@ -399,6 +425,7 @@ class SpendSenseViewModel: ObservableObject {
         if let idx = alerts.firstIndex(where: { $0.id == id }) {
             alerts[idx].isRead = true
         }
+        try? store?.markAlertRead(id)
     }
 
     // Helpers

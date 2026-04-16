@@ -34,6 +34,7 @@
 		A038 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F038 /* SettingsView.swift */; };
 		A039 /* AddTransactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F039 /* AddTransactionSheet.swift */; };
 		A040 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* TransactionsView.swift */; };
+		A041 /* SpendingZonesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041 /* SpendingZonesMapView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 		F038 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F039 /* AddTransactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionSheet.swift; sourceTree = "<group>"; };
 		F040 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
+		F041 /* SpendingZonesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingZonesMapView.swift; sourceTree = "<group>"; };
 		FAPP /* SpendSense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpendSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -193,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				F037 /* InsightsView.swift */,
+				F041 /* SpendingZonesMapView.swift */,
 			);
 			path = Insights;
 			sourceTree = "<group>";
@@ -423,6 +426,7 @@
 				A035 /* BudgetView.swift in Sources */,
 				A036 /* HomeView.swift in Sources */,
 				A037 /* InsightsView.swift in Sources */,
+				A041 /* SpendingZonesMapView.swift in Sources */,
 				A038 /* SettingsView.swift in Sources */,
 				A039 /* AddTransactionSheet.swift in Sources */,
 				A040 /* TransactionsView.swift in Sources */,

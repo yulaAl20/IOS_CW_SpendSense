@@ -10,7 +10,7 @@ import SwiftUI
 import WidgetKit
 
 struct SpendSenseWidgetControl: ControlWidget {
-    static let kind: String = "com.spendsense.app.SpendSenseWidget"
+    static let kind: String = "com.yulaAl20.spendsense.app.SpendSenseWidget"
 
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(

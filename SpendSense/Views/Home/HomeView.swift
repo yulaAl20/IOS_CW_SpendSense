@@ -11,6 +11,7 @@ struct HomeView: View {
     @EnvironmentObject var appState: AppStateViewModel
     @EnvironmentObject var vm: SpendSenseViewModel
     @State private var showWishlist = false
+    @State private var showAlerts = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -128,9 +129,9 @@ struct HomeView: View {
                 
                 Spacer()
                 
-                NavigationLink(destination: SettingsView()
-                    .environmentObject(vm)
-                    .environmentObject(appState)) {
+                Button {
+                    showAlerts = true
+                } label: {
                     ZStack {
                         Circle()
                             .fill(
@@ -141,13 +142,22 @@ struct HomeView: View {
                                 )
                             )
                             .frame(width: 44, height: 44)
-                        
-                        Text(String((vm.userProfile.name.isEmpty ? "S" : vm.userProfile.name).prefix(1)).uppercased())
-                            .font(.headline)
-                            .fontWeight(.bold)
+
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
+
+                        if vm.unreadAlertsCount > 0 {
+                            Text("\(min(vm.unreadAlertsCount, 99))")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 18, height: 18)
+                                .background(Circle().fill(Color.ssDanger))
+                                .offset(x: 14, y: -14)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
@@ -155,6 +165,9 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showWishlist) {
             WishlistSheet().environmentObject(vm)
+        }
+        .sheet(isPresented: $showAlerts) {
+            AlertsView().environmentObject(vm)
         }
     }
 

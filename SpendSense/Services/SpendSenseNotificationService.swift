@@ -8,10 +8,28 @@
 import Foundation
 import UserNotifications
 
+extension Notification.Name {
+    static let spendSenseInAppAlert = Notification.Name("SpendSense.InAppAlert")
+}
+
 final class SpendSenseNotificationService {
 
     static let shared = SpendSenseNotificationService()
     private init() {}
+
+    private func emitInAppAlert(title: String, message: String, type: String) {
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: .spendSenseInAppAlert,
+                object: nil,
+                userInfo: [
+                    "title": title,
+                    "message": message,
+                    "type": type
+                ]
+            )
+        }
+    }
 
     func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
@@ -59,7 +77,8 @@ final class SpendSenseNotificationService {
                             riskScore: Double) {
         let content = UNMutableNotificationContent()
         content.title = "Impulse Alert"
-        content.body = riskBody(amount: amount, category: category, riskScore: riskScore)
+        let body = riskBody(amount: amount, category: category, riskScore: riskScore)
+        content.body = body
         content.sound = .default
         content.categoryIdentifier = "IMPULSE_WARNING"
         content.userInfo = [
@@ -73,6 +92,8 @@ final class SpendSenseNotificationService {
                                             content: content,
                                             trigger: trigger)
         UNUserNotificationCenter.current().add(request)
+
+        emitInAppAlert(title: content.title, message: body, type: "impulseCheck")
     }
 
     func sendBudgetWarning(percentUsed: Int) {
@@ -105,7 +126,8 @@ final class SpendSenseNotificationService {
     func sendLocationAlert(zoneName: String, remainingBudget: Double) {
         let content = UNMutableNotificationContent()
         content.title = "Location Alert"
-        content.body = "You're near \(zoneName). Remaining daily budget: Rs.\(Int(max(0, remainingBudget)))."
+        let body = "You're near \(zoneName). Remaining daily budget: Rs.\(Int(max(0, remainingBudget)))."
+        content.body = body
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
@@ -113,6 +135,8 @@ final class SpendSenseNotificationService {
                                             content: content,
                                             trigger: trigger)
         UNUserNotificationCenter.current().add(request)
+
+        emitInAppAlert(title: content.title, message: body, type: "locationAlert")
     }
 
     private func riskBody(amount: Double, category: String, riskScore: Double) -> String {

@@ -280,6 +280,16 @@ final class CoreDataStore {
         try saveIfNeeded()
     }
 
+    func markAlertRead(_ id: UUID) throws {
+        let request = NSFetchRequest<NSManagedObject>(entityName: "Alert")
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+
+        guard let obj = try context.fetch(request).first else { return }
+        obj.setValue(true, forKey: "wasActionTaken")
+        try saveIfNeeded()
+    }
+
     func deleteAllAlerts() throws { try batchDelete(entityName: "Alert") }
 
     func deleteAllPurchaseAttempts() throws { try batchDelete(entityName: "PurchaseAttempt") }

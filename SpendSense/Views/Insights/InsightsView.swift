@@ -4,6 +4,7 @@
 //
 //  Created by Yulani Alwis on 2026-04-10.
 //
+
 import SwiftUI
 
 struct InsightsView: View {
@@ -34,6 +35,41 @@ struct InsightsView: View {
                     // Behavioral insights
                     BehavioralInsights(vm: vm)
                         .padding(.horizontal, 20)
+
+                    // MapKit spending zones (for location alerts)
+                    NavigationLink(destination: SpendingZonesMapView()) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.ssViolet.opacity(0.15))
+                                    .frame(width: 42, height: 42)
+                                Image(systemName: "map.fill")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.ssViolet)
+                            }
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Spending Zones")
+                                    .font(SSFont.display(15, weight: .bold))
+                                    .foregroundColor(.ssTextPrimary)
+                                Text("View high-spending areas and simulate location alerts.")
+                                    .font(SSFont.body(12))
+                                    .foregroundColor(.ssTextSecondary)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.ssTextTertiary)
+                        }
+                        .padding(16)
+                        .background(Color.ssSurface)
+                        .cornerRadius(18)
+                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.ssBorder, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 20)
 
                     Spacer().frame(height: 100)
                 }

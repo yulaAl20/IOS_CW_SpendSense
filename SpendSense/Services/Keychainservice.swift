@@ -10,7 +10,7 @@ import Security
 
 final class KeychainService {
     static let shared = KeychainService()
-    private let service = "com.spendsense.app"
+    private let service = "com.yulaAl20.spendsense.app"
     private init() {}
 
     func saveCredentials(uid: String, email: String) {
