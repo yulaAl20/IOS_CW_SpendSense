@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import LocalAuthentication
+import AuthenticationServices
 
 struct LoginView: View {
     @EnvironmentObject var appState: AppStateViewModel
@@ -20,6 +21,7 @@ struct LoginView: View {
     @State private var showError   = false
     @State private var showForgotPassword = false
     @FocusState private var focused: LoginField?
+    @StateObject private var appleHelper = AppleSignInHelper()
 
     enum LoginField { case email, password }
 
@@ -139,9 +141,7 @@ struct LoginView: View {
                             Rectangle().fill(Color.ssBorder).frame(height: 0.5)
                         }
 
-                        // ── Biometric + Social row ──────────────────
-                        // Face ID: icon-only circle button
-                        // Apple / Google: centered full-width buttons
+                        // Biometric + Social row
                         VStack(spacing: 12) {
                             // Face ID — icon only, circular
                             Button { loginWithBiometrics() } label: {
@@ -160,25 +160,25 @@ struct LoginView: View {
                                 }
                             }
                             .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity)   // centre in the column
+                            .frame(maxWidth: .infinity)
 
-                            // Apple
+                            // Apple Sign-In
                             CenteredSocialButton(
                                 icon: "apple.logo",
                                 label: "Continue with Apple",
                                 foreground: scheme == .dark ? Color.white : Color.black,
                                 background: scheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.06),
                                 border: scheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.12)
-                            ) { socialLogin() }
+                            ) { loginWithApple() }
 
-                            // Google
+                            // Google Sign-In
                             CenteredSocialButton(
                                 icon: "globe",
                                 label: "Continue with Google",
                                 foreground: Color.ssTextPrimary,
                                 background: Color.ssSurface,
                                 border: Color.ssBorder
-                            ) { socialLogin() }
+                            ) { loginWithGoogle() }
                         }
                     }
                     .padding(.horizontal, 24)
@@ -207,6 +207,8 @@ struct LoginView: View {
         }
     }
 
+    //Email/Password Login
+
     private func loginWithEmail() {
         focused = nil
         guard !email.isEmpty else { errorMsg = "Please enter your email address."; showError = true; return }
@@ -216,11 +218,7 @@ struct LoginView: View {
         Task { @MainActor in
             do {
                 let uid = try await FirebaseService.shared.signIn(email: email, password: password)
-                appState.pendingFirebaseUID = uid
-                appState.pendingEmail       = email
-                vm.loadFromFirestore(uid: uid)   // pull this user's data from Firestore
-                isLoading = false
-                appState.login()
+                completeLogin(uid: uid, email: email)
             } catch {
                 isLoading = false
                 errorMsg  = error.localizedDescription
@@ -228,6 +226,8 @@ struct LoginView: View {
             }
         }
     }
+
+    // Biometric Login
 
     private func loginWithBiometrics() {
         let context = LAContext()
@@ -246,11 +246,61 @@ struct LoginView: View {
         }
     }
 
-    private func socialLogin() {
+    // Apple Sign-In
+
+    private func loginWithApple() {
         isLoading = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            isLoading = false
-            appState.login()
+        showError = false
+        Task { @MainActor in
+            do {
+                let result = try await appleHelper.signIn()
+                completeLogin(uid: result.uid, email: result.email, displayName: result.displayName)
+            } catch {
+                isLoading = false
+                // User cancelled — don't show error
+                if (error as NSError).code == ASAuthorizationError.canceled.rawValue { return }
+                errorMsg = error.localizedDescription
+                showError = true
+            }
         }
+    }
+
+    // Google Sign-In
+
+    private func loginWithGoogle() {
+        isLoading = true
+        showError = false
+        Task { @MainActor in
+            do {
+                let result = try await GoogleSignInHelper.shared.signIn()
+                completeLogin(uid: result.uid, email: result.email, displayName: result.displayName)
+            } catch {
+                isLoading = false
+                // GIDSignIn error code -5 = user cancelled
+                if (error as NSError).code == -5 || (error as NSError).code == 5 { return }
+                errorMsg = error.localizedDescription
+                showError = true
+            }
+        }
+    }
+
+    //  Shared completion
+
+    private func completeLogin(uid: String, email: String, displayName: String = "") {
+        appState.pendingFirebaseUID = uid
+        appState.pendingEmail       = email
+        vm.loadFromFirestore(uid: uid)
+
+        // If the user's profile name is empty and we got a display name from the provider, save it
+        if vm.userProfile.name.isEmpty && !displayName.isEmpty {
+            var profile = vm.userProfile
+            profile.name = displayName
+            profile.email = email
+            profile.firebaseUID = uid
+            vm.updateUserProfile(profile)
+        }
+
+        isLoading = false
+        appState.login()
     }
 }

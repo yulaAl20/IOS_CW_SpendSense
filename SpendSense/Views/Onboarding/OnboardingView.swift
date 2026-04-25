@@ -5,6 +5,7 @@
 //  Created by Yulani Alwis on 2026-04-15.
 //
 import SwiftUI
+import AuthenticationServices
 
 struct OnboardingView: View {
     @EnvironmentObject var appState: AppStateViewModel
@@ -261,6 +262,10 @@ struct OnboardingStep1: View {
     @EnvironmentObject var appState: AppStateViewModel
     @Environment(\.colorScheme) var scheme
     @FocusState private var focused: AccountField?
+    @StateObject private var appleHelper = AppleSignInHelper()
+    @State private var socialError: String = ""
+    @State private var showSocialError = false
+    @State private var isSocialLoading = false
 
     enum AccountField { case email, password, confirm }
 
@@ -300,6 +305,15 @@ struct OnboardingStep1: View {
                     .transition(.opacity)
                 }
 
+                if showSocialError {
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.ssDanger)
+                        Text(socialError).font(SSFont.body(13)).foregroundColor(.ssDanger)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity)
+                }
+
                 HStack(spacing: 12) {
                     Rectangle().fill(Color.ssBorder).frame(height: 0.5)
                     Text("or sign up with").font(SSFont.body(12)).foregroundColor(.ssTextTertiary).fixedSize()
@@ -311,11 +325,18 @@ struct OnboardingStep1: View {
                                  fg: scheme == .dark ? Color.white : Color.black,
                                  bg: scheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.06),
                                  border: scheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.12)
-                    ) { vm.usedSocialSignUp = true }
+                    ) { signUpWithApple() }
 
                     socialButton(icon: "globe", label: "Continue with Google",
                                  fg: Color.ssTextPrimary, bg: Color.ssSurface, border: Color.ssBorder
-                    ) { vm.usedSocialSignUp = true }
+                    ) { signUpWithGoogle() }
+                }
+                .disabled(isSocialLoading)
+                .overlay {
+                    if isSocialLoading {
+                        ProgressView()
+                            .tint(.ssAccent)
+                    }
                 }
 
                 Spacer(minLength: 40)
@@ -323,6 +344,56 @@ struct OnboardingStep1: View {
             .padding(.horizontal, 24)
         }
         .onTapGesture { focused = nil }
+    }
+
+    //Apple Sign-Up
+
+    private func signUpWithApple() {
+        isSocialLoading = true
+        showSocialError = false
+        Task { @MainActor in
+            do {
+                let result = try await appleHelper.signIn()
+                vm.email = result.email
+                if vm.name.isEmpty && !result.displayName.isEmpty {
+                    vm.name = result.displayName
+                }
+                vm.usedSocialSignUp = true
+                appState.pendingFirebaseUID = result.uid
+                appState.pendingEmail = result.email
+                isSocialLoading = false
+            } catch {
+                isSocialLoading = false
+                if (error as NSError).code == ASAuthorizationError.canceled.rawValue { return }
+                socialError = error.localizedDescription
+                showSocialError = true
+            }
+        }
+    }
+
+    //  Google Sign-Up
+
+    private func signUpWithGoogle() {
+        isSocialLoading = true
+        showSocialError = false
+        Task { @MainActor in
+            do {
+                let result = try await GoogleSignInHelper.shared.signIn()
+                vm.email = result.email
+                if vm.name.isEmpty && !result.displayName.isEmpty {
+                    vm.name = result.displayName
+                }
+                vm.usedSocialSignUp = true
+                appState.pendingFirebaseUID = result.uid
+                appState.pendingEmail = result.email
+                isSocialLoading = false
+            } catch {
+                isSocialLoading = false
+                if (error as NSError).code == -5 || (error as NSError).code == 5 { return }
+                socialError = error.localizedDescription
+                showSocialError = true
+            }
+        }
     }
 
     @ViewBuilder
@@ -550,3 +621,4 @@ struct OnboardingView_Previews: PreviewProvider {
     }
 }
 #endif
+

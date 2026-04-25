@@ -175,7 +175,7 @@ struct SettingsView: View {
                 WishlistSheet().environmentObject(vm)
             }
             .sheet(isPresented: $showSyncBackups) {
-                SyncBackupsSheet()
+                SyncBackupsSheet().environmentObject(vm)
             }
             .sheet(isPresented: $showEditBudget) {
                 EditBudgetSheet(
@@ -1118,8 +1118,12 @@ struct ProfileInputRow: View {
 // Sync & Backups Sheet
 
 struct SyncBackupsSheet: View {
+    @EnvironmentObject var vm: SpendSenseViewModel
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var scheme
+    @State private var isSyncing = false
+    @State private var syncDone = false
+    @State private var syncError: String?
 
     var body: some View {
         NavigationView {
@@ -1134,7 +1138,7 @@ struct SyncBackupsSheet: View {
                         Text("Sync & Backups")
                             .font(SSFont.display(22, weight: .bold))
                             .foregroundColor(.ssTextPrimary)
-                        Text("Your data is backed up automatically.")
+                        Text("Your data is backed up to Firebase.")
                             .font(SSFont.body(14))
                             .foregroundColor(.ssTextSecondary)
                             .multilineTextAlignment(.center)
@@ -1143,11 +1147,13 @@ struct SyncBackupsSheet: View {
                     VStack(spacing: 12) {
                         BackupInfoRow(icon: "checkmark.icloud.fill", color: .ssAccent,
                                      title: "Last backup",
-                                     value: "Today, \(Date().formatted(date: .omitted, time: .shortened))")
-                        BackupInfoRow(icon: "arrow.up.icloud.fill", color: .ssInfo,
-                                     title: "Storage used", value: "12 MB")
-                        BackupInfoRow(icon: "lock.icloud.fill", color: .ssViolet,
-                                     title: "Encryption", value: "AES-256")
+                                     value: syncDone ? "Just now" : "Today, \(Date().formatted(date: .omitted, time: .shortened))")
+                        BackupInfoRow(icon: "doc.text.fill", color: .ssInfo,
+                                     title: "Transactions", value: "\(vm.transactions.filter { !$0.isSimulated }.count)")
+                        BackupInfoRow(icon: "chart.pie.fill", color: .ssViolet,
+                                     title: "Budgets", value: "\(vm.budgets.count)")
+                        BackupInfoRow(icon: "heart.fill", color: .ssDanger,
+                                     title: "Wishlist items", value: "\(vm.wishlist.count)")
                     }
                     .padding()
                     .background(Color.ssSurface)
@@ -1157,15 +1163,40 @@ struct SyncBackupsSheet: View {
                     .shadow(color: scheme == .dark ? .clear : Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
                     .padding(.horizontal, 20)
 
-                    Button { } label: {
-                        Label("Backup Now", systemImage: "arrow.up.icloud")
-                            .font(SSFont.body(15, weight: .semibold))
-                            .foregroundColor(.black.opacity(0.75))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(LinearGradient.ssAccentGradient)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    if let error = syncError {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.ssDanger)
+                            Text(error).font(SSFont.body(13)).foregroundColor(.ssDanger)
+                        }
+                        .padding(.horizontal, 20)
                     }
+
+                    if syncDone {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.ssAccent)
+                            Text("Backup complete!").font(SSFont.body(14, weight: .semibold)).foregroundColor(.ssAccent)
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    }
+
+                    Button {
+                        performBackup()
+                    } label: {
+                        ZStack {
+                            if isSyncing {
+                                ProgressView().tint(.black.opacity(0.6))
+                            } else {
+                                Label(syncDone ? "Backed Up ✓" : "Backup Now", systemImage: "arrow.up.icloud")
+                                    .font(SSFont.body(15, weight: .semibold))
+                                    .foregroundColor(.black.opacity(0.75))
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(LinearGradient.ssAccentGradient)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .disabled(isSyncing || syncDone)
                     .padding(.horizontal, 20)
                     Spacer()
                 }
@@ -1178,6 +1209,21 @@ struct SyncBackupsSheet: View {
                     Button("Done") { dismiss() }.foregroundColor(.ssAccent)
                 }
             }
+        }
+    }
+
+    private func performBackup() {
+        isSyncing = true
+        syncError = nil
+        syncDone = false
+        Task { @MainActor in
+            do {
+                try await vm.syncToFirebase()
+                withAnimation(.spring(response: 0.4)) { syncDone = true }
+            } catch {
+                syncError = error.localizedDescription
+            }
+            isSyncing = false
         }
     }
 }
