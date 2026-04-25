@@ -182,7 +182,7 @@ struct SettingsView: View {
                     monthly: vm.monthlyBudget,
                     categories: vm.budgets.filter { $0.category != nil && $0.period == .monthly }
                 ) { newBudget, newCats in
-                    upsertBudgets(monthly: newBudget, categories: newCats)
+                    vm.updateBudgets(monthly: newBudget, categories: newCats)
                     showEditBudget = false
                 }
             }
@@ -469,21 +469,6 @@ struct SettingsView: View {
         }
     }
 
-    private func upsertBudgets(monthly: Double, categories: [BudgetModel]) {
-        if let idx = vm.budgets.firstIndex(where: { $0.category == nil && $0.period == .monthly }) {
-            vm.budgets[idx].limit = monthly
-        } else {
-            vm.budgets.insert(BudgetModel(category: nil, limit: monthly, period: .monthly), at: 0)
-        }
-        for nb in categories {
-            guard let cat = nb.category else { continue }
-            if let i = vm.budgets.firstIndex(where: { $0.category == cat && $0.period == .monthly }) {
-                vm.budgets[i].limit = nb.limit
-            } else {
-                vm.budgets.append(BudgetModel(category: cat, limit: nb.limit, period: .monthly))
-            }
-        }
-    }
 
     private func performLogout() async {
         isSyncing = true

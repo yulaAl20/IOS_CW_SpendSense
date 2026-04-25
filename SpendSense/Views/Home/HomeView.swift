@@ -182,7 +182,6 @@ struct HomeView: View {
 
 struct BudgetHeroCard: View {
     @EnvironmentObject var vm: SpendSenseViewModel
-    @State private var animateRing = false
 
     var body: some View {
         ZStack {
@@ -215,7 +214,7 @@ struct BudgetHeroCard: View {
                         .frame(width: 110, height: 110)
 
                     Circle()
-                        .trim(from: 0, to: animateRing ? vm.monthlyProgress : 0)
+                        .trim(from: 0, to: vm.monthlyProgress)
                         .stroke(
                             LinearGradient(
                                 colors: [vm.currentRiskLevel.color, vm.currentRiskLevel.color.opacity(0.6)],
@@ -225,7 +224,6 @@ struct BudgetHeroCard: View {
                         )
                         .frame(width: 110, height: 110)
                         .rotationEffect(.degrees(-90))
-                        .animation(.easeOut(duration: 1.2).delay(0.3), value: animateRing)
 
                     VStack(spacing: 2) {
                         Text("\(Int(vm.monthlyProgress * 100))%")
@@ -278,7 +276,6 @@ struct BudgetHeroCard: View {
             .padding(20)
         }
         .padding(.horizontal, 20)
-        .onAppear { animateRing = true }
     }
 }
 
@@ -396,9 +393,9 @@ struct TransactionRow: View {
 
             // Amount & date
             VStack(alignment: .trailing, spacing: 3) {
-                Text("-\(vm.formatCurrency(transaction.amount))")
+                Text(transaction.isIncome ? "+\(vm.formatCurrency(transaction.amount))" : "-\(vm.formatCurrency(transaction.amount))")
                     .font(SSFont.mono(14, weight: .semibold))
-                    .foregroundColor(.ssDanger)
+                    .foregroundColor(transaction.isIncome ? .ssSuccess : .ssDanger)
                 Text(transaction.date.formatted(.dateTime.day().month(.abbreviated)))
                     .font(SSFont.body(11))
                     .foregroundColor(.ssTextTertiary)

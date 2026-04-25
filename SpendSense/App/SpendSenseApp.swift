@@ -8,10 +8,15 @@ import SwiftUI
 import FirebaseCore
 import WidgetKit
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+import UserNotifications
+
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FirebaseApp.configure()
+
+        // Set notification delegate so banners appear even when the app is in the foreground
+        UNUserNotificationCenter.current().delegate = self
 
         SpendSenseNotificationService.shared.requestAuthorization()
         SpendSenseNotificationService.shared.registerNotificationCategories()
@@ -20,6 +25,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         LocationNotificationService.shared.requestPermissions()
 
         return true
+    }
+
+    // Show notifications as active banners + in the notification panel even when the app is open
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .badge, .list])
+    }
+
+    // Handle notification tap
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
     }
 }
 

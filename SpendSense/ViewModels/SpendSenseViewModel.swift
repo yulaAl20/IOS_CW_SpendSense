@@ -159,7 +159,16 @@ class SpendSenseViewModel: ObservableObject {
         let calendar = Calendar.current
         let now = Date()
         return transactions
-            .filter { !$0.isSimulated &&
+            .filter { !$0.isSimulated && !$0.isIncome &&
+                calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    var totalIncomeThisMonth: Double {
+        let calendar = Calendar.current
+        let now = Date()
+        return transactions
+            .filter { !$0.isSimulated && $0.isIncome &&
                 calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
             .reduce(0) { $0 + $1.amount }
     }
@@ -167,7 +176,15 @@ class SpendSenseViewModel: ObservableObject {
     var totalSpentToday: Double {
         let calendar = Calendar.current
         return transactions
-            .filter { !$0.isSimulated &&
+            .filter { !$0.isSimulated && !$0.isIncome &&
+                calendar.isDateInToday($0.date) }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    var totalIncomeToday: Double {
+        let calendar = Calendar.current
+        return transactions
+            .filter { !$0.isSimulated && $0.isIncome &&
                 calendar.isDateInToday($0.date) }
             .reduce(0) { $0 + $1.amount }
     }
@@ -182,8 +199,8 @@ class SpendSenseViewModel: ObservableObject {
             ?? (monthlyBudget / 30)
     }
 
-    var remainingMonthly: Double { monthlyBudget - totalSpentThisMonth }
-    var remainingDaily: Double   { dailyBudget - totalSpentToday }
+    var remainingMonthly: Double { monthlyBudget + totalIncomeThisMonth - totalSpentThisMonth }
+    var remainingDaily: Double   { dailyBudget + totalIncomeToday - totalSpentToday }
 
     var monthlyProgress: Double {
         guard monthlyBudget > 0 else { return 0 }
@@ -212,7 +229,7 @@ class SpendSenseViewModel: ObservableObject {
         let now = Date()
         return transactions
             .filter { t in
-                guard !t.isSimulated && t.category == category else { return false }
+                guard !t.isSimulated && !t.isIncome && t.category == category else { return false }
                 switch period {
                 case .daily:   return calendar.isDateInToday(t.date)
                 case .weekly:  return calendar.isDate(t.date, equalTo: now, toGranularity: .weekOfYear)
@@ -224,6 +241,36 @@ class SpendSenseViewModel: ObservableObject {
 
     func budgetLimit(for category: SpendingCategory) -> Double? {
         budgets.first(where: { $0.category == category })?.limit
+    }
+
+    func updateBudgets(monthly: Double, categories: [BudgetModel]) {
+        // Update Monthly Budget
+        if let idx = budgets.firstIndex(where: { $0.category == nil && $0.period == .monthly }) {
+            budgets[idx].limit = monthly
+        } else {
+            budgets.insert(BudgetModel(category: nil, limit: monthly, period: .monthly), at: 0)
+        }
+        try? store?.upsertBudget(category: nil, period: .monthly, limit: monthly)
+
+        // Update Category Budgets
+        for nb in categories {
+            guard let cat = nb.category else { continue }
+            if let i = budgets.firstIndex(where: { $0.category == cat && $0.period == .monthly }) {
+                budgets[i].limit = nb.limit
+            } else {
+                budgets.append(BudgetModel(category: cat, limit: nb.limit, period: .monthly))
+            }
+            try? store?.upsertBudget(category: cat, period: .monthly, limit: nb.limit)
+        }
+    }
+
+    func setCategoryBudget(category: SpendingCategory, limit: Double) {
+        if let idx = budgets.firstIndex(where: { $0.category == category && $0.period == .monthly }) {
+            budgets[idx].limit = limit
+        } else {
+            budgets.append(BudgetModel(category: category, limit: limit, period: .monthly))
+        }
+        try? store?.upsertBudget(category: category, period: .monthly, limit: limit)
     }
 
     // Simulate Purchase
@@ -273,6 +320,14 @@ class SpendSenseViewModel: ObservableObject {
                     amount: amount, category: category.rawValue, riskScore: risk.score
                 )
             }
+            // Start / update the Live Activity
+            LiveActivityManager.shared.update(
+                remainingBudget: remainingDaily,
+                dailyBudget:     dailyBudget,
+                riskLevel:       currentRiskLevel.rawValue,
+                spentToday:      totalSpentToday,
+                userName:        userProfile.name
+            )
         }
 
         // Update widget data
@@ -444,12 +499,60 @@ class SpendSenseViewModel: ObservableObject {
         return (0..<7).map { offset in
             let date = calendar.date(byAdding: .day, value: -offset, to: today)!
             let total = transactions
-                .filter { !$0.isSimulated && calendar.isDate($0.date, inSameDayAs: date) }
+                .filter { !$0.isSimulated && !$0.isIncome && calendar.isDate($0.date, inSameDayAs: date) }
                 .reduce(0) { $0 + $1.amount }
             let label = offset == 0 ? "Today" :
                 calendar.weekdaySymbols[calendar.component(.weekday, from: date) - 1].prefix(3).description
             return DaySpending(label: label, amount: total, date: date)
         }.reversed()
+    }
+
+    // Daily Spending Data (24 hourly buckets for today)
+    var dailySpendingData: [DaySpending] {
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfDay = calendar.startOfDay(for: now)
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale.current
+        formatter.dateFormat = "ha" // e.g. 1PM
+
+        return (0..<24).compactMap { hour in
+            guard let bucketStart = calendar.date(byAdding: .hour, value: hour, to: startOfDay) else { return nil }
+            guard let bucketEnd = calendar.date(byAdding: .hour, value: 1, to: bucketStart) else { return nil }
+
+            let total = transactions
+                .filter { t in
+                    guard !t.isSimulated && !t.isIncome else { return false }
+                    return t.date >= bucketStart && t.date < bucketEnd
+                }
+                .reduce(0) { $0 + $1.amount }
+
+            return DaySpending(label: formatter.string(from: bucketStart), amount: total, date: bucketStart)
+        }
+    }
+
+    // Monthly Spending Data (one bucket per day in the current month)
+    var monthlySpendingData: [DaySpending] {
+        let calendar = Calendar.current
+        let now = Date()
+
+        guard let dayRange = calendar.range(of: .day, in: .month, for: now) else { return [] }
+        let comps = calendar.dateComponents([.year, .month], from: now)
+
+        return dayRange.compactMap { day in
+            var dc = DateComponents()
+            dc.year = comps.year
+            dc.month = comps.month
+            dc.day = day
+            guard let date = calendar.date(from: dc) else { return nil }
+
+            let total = transactions
+                .filter { !$0.isSimulated && !$0.isIncome && calendar.isDate($0.date, inSameDayAs: date) }
+                .reduce(0) { $0 + $1.amount }
+
+            return DaySpending(label: String(day), amount: total, date: date)
+        }
     }
 
     var categoryBreakdown: [CategorySpending] {

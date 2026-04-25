@@ -12,12 +12,19 @@ struct PersistenceController {
 
     let container: NSPersistentContainer
 
-    init() {
+    init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "SpendSenseModel")
-        
-        container.loadPersistentStores { description, error in
-            if let error = error as NSError? {
-                fatalError("Core Data failed: \(error), \(error.userInfo)")
+
+        if inMemory {
+            let description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+            description.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions = [description]
+        }
+
+        container.loadPersistentStores { _, error in
+            if let error {
+                fatalError("Core Data error: \(error)")
             }
         }
     }

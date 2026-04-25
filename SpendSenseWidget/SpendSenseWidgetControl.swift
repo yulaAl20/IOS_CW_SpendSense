@@ -9,6 +9,7 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
+@available(iOS 18.0, *)
 struct SpendSenseWidgetControl: ControlWidget {
     static let kind: String = "com.yulaAl20.spendsense.app.SpendSenseWidget"
 
@@ -30,6 +31,7 @@ struct SpendSenseWidgetControl: ControlWidget {
     }
 }
 
+@available(iOS 18.0, *)
 extension SpendSenseWidgetControl {
     struct Value {
         var isRunning: Bool
@@ -48,6 +50,7 @@ extension SpendSenseWidgetControl {
     }
 }
 
+@available(iOS 18.0, *)
 struct TimerConfiguration: ControlConfigurationIntent {
     static let title: LocalizedStringResource = "Timer Name Configuration"
 
@@ -55,6 +58,7 @@ struct TimerConfiguration: ControlConfigurationIntent {
     var timerName: String
 }
 
+@available(iOS 18.0, *)
 struct StartTimerIntent: SetValueIntent {
     static let title: LocalizedStringResource = "Start a timer"
 

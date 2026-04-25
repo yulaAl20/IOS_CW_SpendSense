@@ -74,6 +74,9 @@ struct BudgetView: View {
             .navigationTitle("Budget Goals")
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .sheet(isPresented: $showAddBudget) {
+                SetCategoryBudgetSheet(vm: vm)
+            }
         }
     }
 }
@@ -293,3 +296,113 @@ struct BudgetView_Previews: PreviewProvider {
     }
 }
 #endif
+
+// Set Category Budget Sheet
+struct SetCategoryBudgetSheet: View {
+    @ObservedObject var vm: SpendSenseViewModel
+    @Environment(\.dismiss) var dismiss
+
+    @State private var selectedCategory: SpendingCategory = .food
+    @State private var amountString: String = ""
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color.ssBackground.ignoresSafeArea()
+
+                VStack(spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Category")
+                            .font(SSFont.body(13, weight: .semibold))
+                            .foregroundColor(.ssTextSecondary)
+
+                        HStack {
+                            ZStack {
+                                Circle()
+                                    .fill(selectedCategory.color.opacity(0.15))
+                                    .frame(width: 36, height: 36)
+                                Image(systemName: selectedCategory.icon)
+                                    .foregroundColor(selectedCategory.color)
+                            }
+
+                            Picker("Category", selection: $selectedCategory) {
+                                ForEach(SpendingCategory.allCases) { cat in
+                                    Text(cat.rawValue).tag(cat)
+                                }
+                            }
+                            .tint(.ssTextPrimary)
+                            Spacer()
+                        }
+                        .padding(14)
+                        .background(Color.ssSurface)
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.ssBorder, lineWidth: 1))
+                    }
+                    .padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Monthly Limit")
+                            .font(SSFont.body(13, weight: .semibold))
+                            .foregroundColor(.ssTextSecondary)
+
+                        HStack(spacing: 4) {
+                            Text("Rs.")
+                                .font(SSFont.body(18, weight: .semibold))
+                                .foregroundColor(.ssTextTertiary)
+                            TextField("0", text: $amountString)
+                                .font(SSFont.mono(28, weight: .bold))
+                                .foregroundColor(.ssTextPrimary)
+                                .keyboardType(.decimalPad)
+                        }
+                        .padding(16)
+                        .background(Color.ssSurface)
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.ssBorder, lineWidth: 1))
+                    }
+                    .padding(.horizontal, 20)
+
+                    Spacer()
+
+                    Button {
+                        if let limit = Double(amountString.replacingOccurrences(of: ",", with: "")) {
+                            vm.setCategoryBudget(category: selectedCategory, limit: limit)
+                            dismiss()
+                        }
+                    } label: {
+                        Text("Save Budget")
+                            .font(SSFont.body(16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(LinearGradient.ssAccentGradient)
+                            .cornerRadius(14)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                }
+                .padding(.top, 24)
+            }
+            .navigationTitle("Category Budget")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundColor(.ssTextSecondary)
+                }
+            }
+            .onAppear {
+                if let currentLimit = vm.budgetLimit(for: selectedCategory) {
+                    amountString = String(Int(currentLimit))
+                }
+            }
+            .onChange(of: selectedCategory) { newCategory in
+                if let currentLimit = vm.budgetLimit(for: newCategory) {
+                    amountString = String(Int(currentLimit))
+                } else {
+                    amountString = ""
+                }
+            }
+        }
+    }
+}
+

@@ -38,6 +38,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		780A8C592F9C7C130026C5FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PPROJ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = TTARGET;
+			remoteInfo = SpendSense;
+		};
 		78ABA3F92F80EB3D0052FA6B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = PPROJ /* Project object */;
@@ -64,6 +71,7 @@
 /* Begin PBXFileReference section */
 		5A1016022F7A570800CD5492 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		5ABD24552F7B847A0027B0D1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		780A8C552F9C7C130026C5FE /* SpendSenseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpendSenseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SpendSenseWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		78ABA3E72F80EB3B0052FA6B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		78ABA3E92F80EB3B0052FA6B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -91,13 +99,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		78264E042F9098D700B2624E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Untitled.swift,
-			);
-			target = TTARGET /* SpendSense */;
-		};
 		78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -108,13 +109,21 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5A10161D2F7A67ED00CD5492 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (78264E042F9098D700B2624E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
+		5A10161D2F7A67ED00CD5492 /* Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Services; sourceTree = "<group>"; };
 		5A10161E2F7A67ED00CD5492 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
 		5A10161F2F7A67ED00CD5492 /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
+		780A8C562F9C7C130026C5FE /* SpendSenseTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SpendSenseTests; sourceTree = "<group>"; };
 		78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (78ABA3FC2F80EB3D0052FA6B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SpendSenseWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		780A8C522F9C7C130026C5FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		78ABA3E32F80EB3B0052FA6B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -228,6 +237,7 @@
 			children = (
 				FAPP /* SpendSense.app */,
 				78ABA3E62F80EB3B0052FA6B /* SpendSenseWidgetExtension.appex */,
+				780A8C552F9C7C130026C5FE /* SpendSenseTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -245,6 +255,7 @@
 			children = (
 				GMAIN /* SpendSense */,
 				78ABA3EB2F80EB3B0052FA6B /* SpendSenseWidget */,
+				780A8C562F9C7C130026C5FE /* SpendSenseTests */,
 				5A1016072F7A5C6E00CD5492 /* Frameworks */,
 				GPRODUCTS /* Products */,
 				5ABD24552F7B847A0027B0D1 /* GoogleService-Info.plist */,
@@ -288,6 +299,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		780A8C542F9C7C130026C5FE /* SpendSenseTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 780A8C5B2F9C7C130026C5FE /* Build configuration list for PBXNativeTarget "SpendSenseTests" */;
+			buildPhases = (
+				780A8C512F9C7C130026C5FE /* Sources */,
+				780A8C522F9C7C130026C5FE /* Frameworks */,
+				780A8C532F9C7C130026C5FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				780A8C5A2F9C7C130026C5FE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				780A8C562F9C7C130026C5FE /* SpendSenseTests */,
+			);
+			name = SpendSenseTests;
+			packageProductDependencies = (
+			);
+			productName = SpendSenseTests;
+			productReference = 780A8C552F9C7C130026C5FE /* SpendSenseTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 78ABA3FD2F80EB3D0052FA6B /* Build configuration list for PBXNativeTarget "SpendSenseWidgetExtension" */;
@@ -349,6 +383,10 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
+					780A8C542F9C7C130026C5FE = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = TTARGET;
+					};
 					78ABA3E52F80EB3B0052FA6B = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -375,11 +413,19 @@
 			targets = (
 				TTARGET /* SpendSense */,
 				78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */,
+				780A8C542F9C7C130026C5FE /* SpendSenseTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		780A8C532F9C7C130026C5FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		78ABA3E42F80EB3B0052FA6B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -398,6 +444,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		780A8C512F9C7C130026C5FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		78ABA3E22F80EB3B0052FA6B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -436,6 +489,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		780A8C5A2F9C7C130026C5FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = TTARGET /* SpendSense */;
+			targetProxy = 780A8C592F9C7C130026C5FE /* PBXContainerItemProxy */;
+		};
 		78ABA3FA2F80EB3D0052FA6B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 78ABA3E52F80EB3B0052FA6B /* SpendSenseWidgetExtension */;
@@ -444,11 +502,58 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		780A8C5C2F9C7C130026C5FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsenseapp.SpendSenseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpendSense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpendSense";
+			};
+			name = Debug;
+		};
+		780A8C5D2F9C7C130026C5FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K3L6K33N5Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.spendsenseapp.SpendSenseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpendSense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpendSense";
+			};
+			name = Release;
+		};
 		78ABA3FE2F80EB3D0052FA6B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SpendSenseWidget/SpendSenseWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3L6K33N5Q;
@@ -456,7 +561,7 @@
 				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -481,6 +586,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SpendSenseWidget/SpendSenseWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3L6K33N5Q;
@@ -488,7 +594,7 @@
 				INFOPLIST_FILE = SpendSenseWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SpendSenseWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -630,13 +736,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpendSense/SpendSense.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "SpendSense uses Face ID to protect sensitive financial settings.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to Unlock SpendSense.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SpendSense uses your location to alert you when entering high-spending areas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -661,13 +768,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpendSense/SpendSense.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3L6K33N5Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SpendSense uses the camera for receipt scanning.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "SpendSense uses Face ID to protect sensitive financial settings.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to Unlock SpendSense.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SpendSense uses your location to alert you when entering high-spending areas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -690,6 +798,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		780A8C5B2F9C7C130026C5FE /* Build configuration list for PBXNativeTarget "SpendSenseTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				780A8C5C2F9C7C130026C5FE /* Debug */,
+				780A8C5D2F9C7C130026C5FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		78ABA3FD2F80EB3D0052FA6B /* Build configuration list for PBXNativeTarget "SpendSenseWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

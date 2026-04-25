@@ -22,7 +22,11 @@ struct TransactionsView: View {
         }
     }
 
-    var totalFiltered: Double { filtered.reduce(0) { $0 + $1.amount } }
+    var totalFiltered: Double {
+        filtered.reduce(0) { total, t in
+            total + (t.isIncome ? -t.amount : t.amount)
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -76,9 +80,10 @@ struct TransactionsView: View {
                     .font(SSFont.body(13))
                     .foregroundColor(.ssTextSecondary)
                 Spacer()
-                Text("Total: \(vm.formatCurrency(totalFiltered))")
+                let prefix = totalFiltered < 0 ? "+" : (totalFiltered > 0 ? "-" : "")
+                Text("Total: \(prefix)\(vm.formatCurrency(abs(totalFiltered)))")
                     .font(SSFont.mono(13, weight: .semibold))
-                    .foregroundColor(.ssDanger)
+                    .foregroundColor(totalFiltered < 0 ? .ssSuccess : (totalFiltered > 0 ? .ssDanger : .ssTextPrimary))
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)

@@ -125,10 +125,12 @@ final class SpendSenseNotificationService {
 
     func sendLocationAlert(zoneName: String, remainingBudget: Double) {
         let content = UNMutableNotificationContent()
-        content.title = "Location Alert"
-        let body = "You're near \(zoneName). Remaining daily budget: Rs.\(Int(max(0, remainingBudget)))."
+        content.title = "⚠️ You are entering a high spending area"
+        let body = "You're near \(zoneName). Be mindful — your remaining daily budget is Rs.\(Int(max(0, remainingBudget))). Think before you spend!"
         content.body = body
-        content.sound = .default
+        content.sound = .defaultCritical
+        content.interruptionLevel = .timeSensitive
+        content.categoryIdentifier = "IMPULSE_WARNING"
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString,

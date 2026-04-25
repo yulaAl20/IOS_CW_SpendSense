@@ -11,6 +11,14 @@ struct InsightsView: View {
     @EnvironmentObject var vm: SpendSenseViewModel
     @State private var selectedPeriod: BudgetPeriod = .weekly
 
+    private var spendingData: [DaySpending] {
+        switch selectedPeriod {
+        case .weekly:  return vm.weeklySpendingData
+        case .daily:   return vm.dailySpendingData
+        case .monthly: return vm.monthlySpendingData
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -24,8 +32,8 @@ struct InsightsView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
 
-                    // Weekly bar chart
-                    WeeklyBarChart(data: vm.weeklySpendingData, vm: vm)
+                    // Spending bar chart
+                    PeriodBarChart(period: selectedPeriod, data: spendingData, vm: vm)
                         .padding(.horizontal, 20)
 
                     // Category breakdown
@@ -82,18 +90,60 @@ struct InsightsView: View {
     }
 }
 
-// Weekly Bar Chart
-struct WeeklyBarChart: View {
+// Period Bar Chart
+struct PeriodBarChart: View {
+    var period: BudgetPeriod
     var data: [DaySpending]
     var vm: SpendSenseViewModel
     @State private var animateBars = false
 
-    var maxAmount: Double { data.map { $0.amount }.max() ?? 1 }
+    var maxAmount: Double {
+        let maxVal = data.map { $0.amount }.max() ?? 1
+        return maxVal > 0 ? maxVal : 1
+    }
+
+    private var title: String {
+        switch period {
+        case .weekly:
+            return "7-Day Spending"
+        case .daily:
+            return "Today (Hourly)"
+        case .monthly:
+            let f = DateFormatter()
+            f.locale = Locale.current
+            f.dateFormat = "MMMM"
+            return "\(f.string(from: Date())) Spending"
+        }
+    }
+
+    private var barWidth: CGFloat {
+        switch period {
+        case .weekly:  return 28
+        case .daily:   return 22
+        case .monthly: return 18
+        }
+    }
+
+    private var barSpacing: CGFloat { 8 }
+
+    private var showValueLabels: Bool { data.count <= 12 }
+
+    private func isCurrentBucket(_ bucket: DaySpending) -> Bool {
+        let calendar = Calendar.current
+        switch period {
+        case .weekly, .monthly:
+            return calendar.isDateInToday(bucket.date)
+        case .daily:
+            let now = Date()
+            return calendar.isDate(bucket.date, equalTo: now, toGranularity: .hour)
+                && calendar.isDate(bucket.date, inSameDayAs: now)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("7-Day Spending")
+                Text(title)
                     .font(SSFont.display(17, weight: .bold))
                     .foregroundColor(.ssTextPrimary)
                 Spacer()
@@ -102,53 +152,87 @@ struct WeeklyBarChart: View {
                     .foregroundColor(.ssTextSecondary)
             }
 
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach(data) { day in
-                    VStack(spacing: 6) {
-                        // Amount label on top of bar
-                        if day.amount > 0 {
-                            Text(day.amount >= 1000 ?
-                                 String(format: "%.0fk", day.amount / 1000) :
-                                 String(Int(day.amount)))
-                                .font(SSFont.mono(9, weight: .medium))
-                                .foregroundColor(.ssTextTertiary)
+            if period == .weekly {
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach(data) { bucket in
+                        VStack(spacing: 6) {
+                            if bucket.amount > 0 {
+                                Text(bucket.amount >= 1000 ?
+                                     String(format: "%.0fk", bucket.amount / 1000) :
+                                     String(Int(bucket.amount)))
+                                    .font(SSFont.mono(9, weight: .medium))
+                                    .foregroundColor(.ssTextTertiary)
+                            }
+
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(
+                                    isCurrentBucket(bucket)
+                                        ? LinearGradient.ssAccentGradient
+                                        : LinearGradient(colors: [Color.ssViolet.opacity(0.7), Color.ssViolet.opacity(0.4)],
+                                                         startPoint: .top, endPoint: .bottom)
+                                )
+                                .frame(height: max(4, CGFloat(bucket.amount / maxAmount) * 120))
+                                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: bucket.amount)
+
+                            Text(bucket.label.prefix(3).description)
+                                .font(SSFont.body(10))
+                                .foregroundColor(isCurrentBucket(bucket) ? .ssAccent : .ssTextTertiary)
                         }
-
-                        // Bar
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                Calendar.current.isDateInToday(day.date)
-                                    ? LinearGradient.ssAccentGradient
-                                    : LinearGradient(colors: [Color.ssViolet.opacity(0.7), Color.ssViolet.opacity(0.4)],
-                                                     startPoint: .top, endPoint: .bottom)
-                            )
-                            .frame(height: animateBars
-                                   ? max(4, CGFloat(day.amount / maxAmount) * 120)
-                                   : 4)
-                            .animation(.spring(response: 0.6, dampingFraction: 0.7)
-                                .delay(Double(data.firstIndex(where: { $0.id == day.id }) ?? 0) * 0.05),
-                                       value: animateBars)
-
-                        Text(day.label.prefix(3).description)
-                            .font(SSFont.body(10))
-                            .foregroundColor(
-                                Calendar.current.isDateInToday(day.date) ? .ssAccent : .ssTextTertiary
-                            )
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .frame(height: 160)
+            } else {
+                GeometryReader { geo in
+                    let contentWidth = CGFloat(data.count) * barWidth + CGFloat(max(0, data.count - 1)) * barSpacing
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(alignment: .bottom, spacing: barSpacing) {
+                            ForEach(data) { bucket in
+                                VStack(spacing: 6) {
+                                    if showValueLabels, bucket.amount > 0 {
+                                        Text(bucket.amount >= 1000 ?
+                                             String(format: "%.0fk", bucket.amount / 1000) :
+                                             String(Int(bucket.amount)))
+                                            .font(SSFont.mono(9, weight: .medium))
+                                            .foregroundColor(.ssTextTertiary)
+                                            .frame(width: barWidth)
+                                    } else {
+                                        Color.clear.frame(height: 10)
+                                    }
+
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(
+                                            isCurrentBucket(bucket)
+                                                ? LinearGradient.ssAccentGradient
+                                                : LinearGradient(
+                                                    colors: [Color.ssViolet.opacity(0.7), Color.ssViolet.opacity(0.4)],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                        )
+                                        .frame(width: barWidth,
+                                               height: max(4, CGFloat(bucket.amount / maxAmount) * 120))
+                                        .animation(.spring(response: 0.6, dampingFraction: 0.7), value: bucket.amount)
+
+                                    Text(bucket.label)
+                                        .font(SSFont.body(10))
+                                        .foregroundColor(isCurrentBucket(bucket) ? .ssAccent : .ssTextTertiary)
+                                        .frame(width: barWidth)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                }
+                            }
+                        }
+                        .frame(width: max(geo.size.width, contentWidth), alignment: .leading)
+                    }
+                }
+                .frame(height: 160)
             }
-            .frame(height: 160)
         }
         .padding(18)
         .background(Color.ssSurface)
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.ssBorder, lineWidth: 1))
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                animateBars = true
-            }
-        }
     }
 }
 
@@ -208,10 +292,8 @@ struct CategoryBreakdownSection: View {
                                         Capsule().fill(Color.ssBorder).frame(height: 5)
                                         Capsule()
                                             .fill(item.category.color)
-                                            .frame(width: geo.size.width * (animateBars ? pct : 0), height: 5)
-                                            .animation(.easeOut(duration: 0.7)
-                                                .delay(Double(breakdown.firstIndex(where: { $0.id == item.id }) ?? 0) * 0.07),
-                                                       value: animateBars)
+                                            .frame(width: geo.size.width * pct, height: 5)
+                                            .animation(.easeOut(duration: 0.7), value: pct)
                                     }
                                 }
                                 .frame(height: 5)
@@ -225,11 +307,6 @@ struct CategoryBreakdownSection: View {
         .background(Color.ssSurface)
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.ssBorder, lineWidth: 1))
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                animateBars = true
-            }
-        }
     }
 }
 

@@ -19,7 +19,9 @@ struct MainTabView: View {
             Group {
                 switch appState.selectedTab {
                 case .home:
-                    HomeView()
+                    NavigationStack {
+                        HomeView()
+                    }
                 case .budget:
                     BudgetView()
                 case .add:

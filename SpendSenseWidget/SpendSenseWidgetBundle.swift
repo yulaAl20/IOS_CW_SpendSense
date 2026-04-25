@@ -12,7 +12,9 @@ import SwiftUI
 struct SpendSenseWidgetBundle: WidgetBundle {
     var body: some Widget {
         SpendSenseWidget()
-        SpendSenseWidgetControl()
+        if #available(iOS 18.0, *) {
+            SpendSenseWidgetControl()
+        }
         SpendSenseWidgetLiveActivity()
     }
 }

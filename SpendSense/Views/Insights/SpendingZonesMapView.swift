@@ -64,55 +64,29 @@ struct SpendingZonesMapView: View {
                             Text("In: \(zone)")
                                 .font(SSFont.body(12, weight: .semibold))
                                 .foregroundColor(.ssAccent)
-                        } else {
-                            Text("Not in a zone")
-                                .font(SSFont.body(12))
-                                .foregroundColor(.ssTextSecondary)
                         }
                     }
 
-                    if locationService.authorizationStatus == .denied || locationService.authorizationStatus == .restricted {
-                        Text("Location permission is off. Enable it in Settings to detect zones automatically.")
-                            .font(SSFont.body(12))
-                            .foregroundColor(.ssTextTertiary)
-                    } else if locationService.authorizationStatus == .notDetermined {
-                        Text("Allow location access to detect when you're near high-spending areas.")
-                            .font(SSFont.body(12))
-                            .foregroundColor(.ssTextTertiary)
-                    }
+                    Text("Tap below to simulate entering a high-spending zone and receive a push notification alert.")
+                        .font(SSFont.body(12))
+                        .foregroundColor(.ssTextTertiary)
 
-                    HStack(spacing: 12) {
-                        Button {
-                            locationService.requestPermissions()
-                        } label: {
-                            Text("Request permission")
-                                .font(SSFont.body(13, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(LinearGradient.ssAccentGradient)
-                                .cornerRadius(14)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(locationService.authorizationStatus == .authorizedAlways || locationService.authorizationStatus == .authorizedWhenInUse)
-
-                        Button {
-                            locationService.simulateFirstZoneEntry()
-                        } label: {
+                    Button {
+                        locationService.simulateFirstZoneEntry()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "location.viewfinder")
+                                .font(.system(size: 14, weight: .semibold))
                             Text("Simulate zone entry")
-                                .font(SSFont.body(13, weight: .semibold))
-                                .foregroundColor(.ssAccent)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(Color.ssSurfaceElevated)
-                                .cornerRadius(14)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color.ssAccent.opacity(0.35), lineWidth: 1)
-                                )
+                                .font(SSFont.body(14, weight: .semibold))
                         }
-                        .buttonStyle(.plain)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(LinearGradient.ssAccentGradient)
+                        .cornerRadius(14)
                     }
+                    .buttonStyle(.plain)
                 }
                 .padding(16)
                 .background(Color.ssSurface)
