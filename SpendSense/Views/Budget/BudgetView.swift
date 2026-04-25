@@ -353,6 +353,15 @@ struct SetCategoryBudgetSheet: View {
                                 .font(SSFont.mono(28, weight: .bold))
                                 .foregroundColor(.ssTextPrimary)
                                 .keyboardType(.decimalPad)
+                                .onChange(of: amountString) { newValue in
+                                    let filtered = newValue.filter { "0123456789.".contains($0) }
+                                    let components = filtered.components(separatedBy: ".")
+                                    if components.count > 2 {
+                                        amountString = components[0] + "." + components.dropFirst().joined()
+                                    } else if filtered != newValue {
+                                        amountString = filtered
+                                    }
+                                }
                         }
                         .padding(16)
                         .background(Color.ssSurface)

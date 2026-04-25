@@ -388,6 +388,12 @@ struct OnboardingStep2: View {
                         TextField("0", text: $vm.monthlyIncome)
                             .font(SSFont.mono(22, weight: .bold)).foregroundColor(.ssTextPrimary)
                             .keyboardType(.numberPad).focused($focused)
+                            .onChange(of: vm.monthlyIncome) { newValue in
+                                let filtered = newValue.filter { "0123456789".contains($0) }
+                                if filtered != newValue {
+                                    vm.monthlyIncome = filtered
+                                }
+                            }
                     }
                     .padding(16)
                     .background(Color.ssSurfaceElevated)

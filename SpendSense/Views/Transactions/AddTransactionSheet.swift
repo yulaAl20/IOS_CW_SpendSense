@@ -60,6 +60,15 @@ struct AddTransactionSheet: View {
                                     .keyboardType(.decimalPad)
                                     .focused($amountFocused)
                                     .frame(maxWidth: .infinity)
+                                    .onChange(of: addVM.amount) { newValue in
+                                        let filtered = newValue.filter { "0123456789.".contains($0) }
+                                        let components = filtered.components(separatedBy: ".")
+                                        if components.count > 2 {
+                                            addVM.amount = components[0] + "." + components.dropFirst().joined()
+                                        } else if filtered != newValue {
+                                            addVM.amount = filtered
+                                        }
+                                    }
                             }
                             .padding(.horizontal, 24)
 

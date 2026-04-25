@@ -416,28 +416,9 @@ class SpendSenseViewModel: ObservableObject {
         }
 
         do {
-            // 1  Wipe old Firestore data so deletions made locally are reflected
-            try await firebase.deleteAllUserData(uid: uid)
-
-            // 2  Upload profile
-            try await firebase.saveProfile(userProfile, uid: uid)
-
-            // 3  Upload transactions (skip simulated ones)
-            for t in transactions where !t.isSimulated {
-                try await firebase.saveTransaction(t, uid: uid)
-            }
-
-            // 4  Upload budgets
-            for b in budgets {
-                try await firebase.saveBudget(b, uid: uid)
-            }
-
-            // 5  Upload wishlist
-            for w in wishlist {
-                try await firebase.saveWishlistItem(w, uid: uid)
-            }
-
-            // 6  Finally, wipe local data
+            try await syncToFirebase()
+            
+            // Finally, wipe local data
             clearLocalData()
             userProfile = UserProfileModel() // Reset profile
         } catch {
@@ -445,6 +426,33 @@ class SpendSenseViewModel: ObservableObject {
             // Still clear local data on failure to prevent merging inconsistent states
             clearLocalData()
             userProfile = UserProfileModel() // Reset profile
+        }
+    }
+
+    /// Pushes the entire local Core Data session to Firebase without wiping local data.
+    func syncToFirebase() async throws {
+        let uid = userProfile.firebaseUID ?? firebase.currentUID ?? ""
+        guard !uid.isEmpty else { return }
+
+        // 1  Wipe old Firestore data so deletions made locally are reflected
+        try await firebase.deleteAllUserData(uid: uid)
+
+        // 2  Upload profile
+        try await firebase.saveProfile(userProfile, uid: uid)
+
+        // 3  Upload transactions (skip simulated ones)
+        for t in transactions where !t.isSimulated {
+            try await firebase.saveTransaction(t, uid: uid)
+        }
+
+        // 4  Upload budgets
+        for b in budgets {
+            try await firebase.saveBudget(b, uid: uid)
+        }
+
+        // 5  Upload wishlist
+        for w in wishlist {
+            try await firebase.saveWishlistItem(w, uid: uid)
         }
     }
 

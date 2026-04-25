@@ -161,7 +161,8 @@ struct HomeView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
-            .frame(height: 50)
+            .padding(.bottom, 10)
+            .background(Color.ssBackground.ignoresSafeArea(edges: .top))
         }
         .sheet(isPresented: $showWishlist) {
             WishlistSheet().environmentObject(vm)

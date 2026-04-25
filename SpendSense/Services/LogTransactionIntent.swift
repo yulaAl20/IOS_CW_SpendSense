@@ -49,13 +49,24 @@ struct LogTransactionIntent: AppIntent {
     )
 
     @IntentParameter(title: "Amount") var amount: Double
-    @IntentParameter(title: "Category") var category: SpendingCategoryEntity
+    @IntentParameter(title: "Select Category") var category: SpendingCategoryEntity?
+    @IntentParameter(title: "Or Type Category", description: "e.g. Food, Transport") var typedCategory: String?
     @IntentParameter(title: "Note", default: "Logged via Siri") var note: String
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
 
-        guard let spendingCategory = SpendingCategory(rawValue: category.id) else {
+        var resolvedCategory: SpendingCategory? = nil
+        
+        if let typed = typedCategory, !typed.isEmpty {
+            resolvedCategory = SpendingCategory.allCases.first { 
+                $0.rawValue.lowercased().contains(typed.lowercased()) 
+            }
+        } else if let catEntity = category {
+            resolvedCategory = SpendingCategory(rawValue: catEntity.id)
+        }
+
+        guard let spendingCategory = resolvedCategory else {
             return .result(dialog: "Sorry, I couldn't find that category.")
         }
 
@@ -114,13 +125,24 @@ struct AddExpenseIntent: AppIntent {
     static var openAppWhenRun: Bool = false
 
     @IntentParameter(title: "Amount") var amount: Double
-    @IntentParameter(title: "Category") var category: SpendingCategoryEntity
+    @IntentParameter(title: "Select Category") var category: SpendingCategoryEntity?
+    @IntentParameter(title: "Or Type Category", description: "e.g. Food") var typedCategory: String?
     @IntentParameter(title: "Note", default: "Quick expense") var note: String
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
 
-        guard let spendingCategory = SpendingCategory(rawValue: category.id) else {
+        var resolvedCategory: SpendingCategory? = nil
+        
+        if let typed = typedCategory, !typed.isEmpty {
+            resolvedCategory = SpendingCategory.allCases.first { 
+                $0.rawValue.lowercased().contains(typed.lowercased()) 
+            }
+        } else if let catEntity = category {
+            resolvedCategory = SpendingCategory(rawValue: catEntity.id)
+        }
+
+        guard let spendingCategory = resolvedCategory else {
             return .result(dialog: "Unknown category. Please try again.")
         }
 
