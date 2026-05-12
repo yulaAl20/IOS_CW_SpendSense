@@ -52,7 +52,7 @@ class SpendSenseViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // Load from CoreData 
+    // Load from CoreData
     func loadFromCoreData() {
         guard let store else { return }
         do {
@@ -64,8 +64,9 @@ class SpendSenseViewModel: ObservableObject {
             alerts       = try store.fetchAlerts()
             wishlist     = try store.fetchWishlistItems()
 
-            // Seed default budgets only on very first launch 
-            if budgets.isEmpty && !userProfile.name.isEmpty {
+            // Seed default budgets only on very first launch.
+            // Do NOT gate this on the profile name; name can be empty depending on auth flow.
+            if budgets.isEmpty && (userProfile.monthlyIncome > 0 || !(userProfile.firebaseUID ?? "").isEmpty) {
                 let defaultBudgets = BudgetModel.defaultBudgets(income: userProfile.monthlyIncome)
                 for b in defaultBudgets {
                     try store.upsertBudget(category: b.category, period: b.period, limit: b.limit)
@@ -136,9 +137,20 @@ class SpendSenseViewModel: ObservableObject {
                 for t in remoteTx { try? store?.insertTransaction(t) }
 
                 let remoteBudgets = try await firebase.fetchBudgets(uid: uid)
-                budgets = remoteBudgets
-                for b in remoteBudgets {
-                    try? store?.upsertBudget(category: b.category, period: b.period, limit: b.limit)
+                if remoteBudgets.isEmpty {
+                    // Repair: if server has no budgets yet, seed sensible defaults locally
+                    // so the UI doesn't show zeros. Optionally push them back to Firestore.
+                    let defaultBudgets = BudgetModel.defaultBudgets(income: userProfile.monthlyIncome)
+                    budgets = defaultBudgets
+                    for b in defaultBudgets {
+                        try? store?.upsertBudget(category: b.category, period: b.period, limit: b.limit)
+                        try? await firebase.saveBudget(b, uid: uid)
+                    }
+                } else {
+                    budgets = remoteBudgets
+                    for b in remoteBudgets {
+                        try? store?.upsertBudget(category: b.category, period: b.period, limit: b.limit)
+                    }
                 }
 
                 let remoteWishlist = try await firebase.fetchWishlist(uid: uid)
@@ -199,8 +211,8 @@ class SpendSenseViewModel: ObservableObject {
             ?? (monthlyBudget / 30)
     }
 
-    var remainingMonthly: Double { monthlyBudget + totalIncomeThisMonth - totalSpentThisMonth }
-    var remainingDaily: Double   { dailyBudget + totalIncomeToday - totalSpentToday }
+    var remainingMonthly: Double { monthlyBudget - totalSpentThisMonth }
+    var remainingDaily: Double   { dailyBudget - totalSpentToday }
 
     var monthlyProgress: Double {
         guard monthlyBudget > 0 else { return 0 }
@@ -493,11 +505,12 @@ class SpendSenseViewModel: ObservableObject {
 
     // Helpers
     func formatCurrency(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencySymbol = "Rs."
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? "Rs.\(Int(value))"
+        CurrencyFormatter.string(from: value, maximumFractionDigits: 0)
+    }
+
+    /// Amount string optimized for VoiceOver.
+    func accessibilityCurrency(_ value: Double) -> String {
+        CurrencyFormatter.accessibilityString(from: value, maximumFractionDigits: 0)
     }
 
     // Weekly Spending Data (for charts)
@@ -573,20 +586,43 @@ class SpendSenseViewModel: ObservableObject {
 
     // Private
     private func checkAndGenerateAlerts(for transaction: TransactionModel) {
+        // ── Monthly budget warning (once per day when over 80%) ──────────────
         if monthlyProgress > 0.8 {
-            let alert = AlertItemModel(
-                title: "Budget Warning",
-                message: "You've used \(Int(monthlyProgress * 100))% of your monthly budget.",
-                type: .budgetWarning
-            )
-            alerts.insert(alert, at: 0)
-
-            if let store {
-                try? store.insertAlert(alert)
+            let alreadyAlertedToday = alerts.contains {
+                $0.type == .budgetWarning && Calendar.current.isDateInToday($0.date)
             }
+            if !alreadyAlertedToday {
+                let alert = AlertItemModel(
+                    title: "Budget Warning",
+                    message: "You've used \(Int(monthlyProgress * 100))% of your monthly budget.",
+                    type: .budgetWarning
+                )
+                alerts.insert(alert, at: 0)
+                if let store { try? store.insertAlert(alert) }
+                SpendSenseNotificationService.shared.sendBudgetWarning(percentUsed: Int(monthlyProgress * 100))
+            }
+        }
 
-            // Also fire a push notification
-            SpendSenseNotificationService.shared.sendBudgetWarning(percentUsed: Int(monthlyProgress * 100))
+        // ── Daily budget exceeded (once per day when daily spend > daily limit) ──
+        if dailyBudget > 0 && totalSpentToday > dailyBudget {
+            let alreadyAlertedToday = alerts.contains {
+                $0.type == .budgetWarning &&
+                $0.title == "Daily Budget Exceeded" &&
+                Calendar.current.isDateInToday($0.date)
+            }
+            if !alreadyAlertedToday {
+                let alert = AlertItemModel(
+                    title: "Daily Budget Exceeded",
+                    message: "You've spent \(formatCurrency(totalSpentToday)) today — over your \(formatCurrency(dailyBudget)) daily limit.",
+                    type: .budgetWarning
+                )
+                alerts.insert(alert, at: 0)
+                if let store { try? store.insertAlert(alert) }
+                SpendSenseNotificationService.shared.sendDailyBudgetWarning(
+                    spent: totalSpentToday,
+                    limit: dailyBudget
+                )
+            }
         }
     }
 

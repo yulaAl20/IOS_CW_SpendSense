@@ -110,6 +110,23 @@ final class SpendSenseNotificationService {
         UNUserNotificationCenter.current().add(request)
     }
 
+    func sendDailyBudgetWarning(spent: Double, limit: Double) {
+        let content = UNMutableNotificationContent()
+        content.title = "Daily Budget Exceeded"
+        let body = "You've spent Rs.\(Int(spent)) today — over your Rs.\(Int(limit)) daily limit. Try to avoid further spending today."
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = "BUDGET_WARNING"
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: "daily-budget-exceeded",
+                                            content: content,
+                                            trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+
+        emitInAppAlert(title: content.title, message: body, type: "budgetWarning")
+    }
+
     func sendTransactionConfirmation(amount: Double, category: String) {
         let content = UNMutableNotificationContent()
         content.title = "Logged via Siri"

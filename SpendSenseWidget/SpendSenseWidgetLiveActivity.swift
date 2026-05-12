@@ -82,9 +82,9 @@ private extension Color {
 private func formatCurrency(_ value: Double) -> String {
     let f = NumberFormatter()
     f.numberStyle = .currency
-    f.currencySymbol = "Rs."
+    f.currencyCode = "LKR"
     f.maximumFractionDigits = 0
-    return f.string(from: NSNumber(value: value)) ?? "Rs.\(Int(value))"
+    return f.string(from: NSNumber(value: value)) ?? "LKR \(Int(value))"
 }
 
 //Live Activity Widget

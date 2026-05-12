@@ -49,6 +49,7 @@ struct SpendSenseEntry: TimelineEntry {
     let userName: String
     let monthlyIncome: Double
     let todayIncome: Double
+    let lastUpdated: TimeInterval
 
     var dailyProgress: Double {
         guard dailyBudget > 0 else { return 0 }
@@ -83,7 +84,8 @@ struct SpendSenseEntry: TimelineEntry {
                         monthlyBudget: 60000, dailyBudget: 2000,
                         remainingDaily: 1150, riskLevel: "Low",
                         lastCategory: "Food & Dining", userName: "Spender",
-                        monthlyIncome: 5000, todayIncome: 0)
+                        monthlyIncome: 5000, todayIncome: 0,
+                        lastUpdated: Date().timeIntervalSince1970)
     }
 }
 
@@ -105,16 +107,17 @@ struct SpendSenseProvider: TimelineProvider {
         let d = WidgetDataStore.defaults
         return SpendSenseEntry(
             date:           Date(),
-            todaySpent:     d.double(forKey: "widget_todaySpent"),
-            monthlySpent:   d.double(forKey: "widget_monthlySpent"),
-            monthlyBudget:  d.double(forKey: "widget_monthlyBudget"),
-            dailyBudget:    d.double(forKey: "widget_dailyBudget"),
-            remainingDaily: d.double(forKey: "widget_remainingDaily"),
-            riskLevel:      d.string(forKey: "widget_riskLevel") ?? "Low",
-            lastCategory:   d.string(forKey: "widget_lastCategory") ?? "--",
-            userName:       d.string(forKey: "widget_userName") ?? "",
-            monthlyIncome:  d.double(forKey: "widget_monthlyIncome"),
-            todayIncome:    d.double(forKey: "widget_todayIncome")
+            todaySpent:     d.double(forKey: WidgetDataStore.Key.todaySpent),
+            monthlySpent:   d.double(forKey: WidgetDataStore.Key.monthlySpent),
+            monthlyBudget:  d.double(forKey: WidgetDataStore.Key.monthlyBudget),
+            dailyBudget:    d.double(forKey: WidgetDataStore.Key.dailyBudget),
+            remainingDaily: d.double(forKey: WidgetDataStore.Key.remainingDaily),
+            riskLevel:      d.string(forKey: WidgetDataStore.Key.riskLevel) ?? "Low",
+            lastCategory:   d.string(forKey: WidgetDataStore.Key.lastCategory) ?? "--",
+            userName:       d.string(forKey: WidgetDataStore.Key.userName) ?? "",
+            monthlyIncome:  d.double(forKey: WidgetDataStore.Key.monthlyIncome),
+            todayIncome:    d.double(forKey: WidgetDataStore.Key.todayIncome),
+            lastUpdated:    d.double(forKey: WidgetDataStore.Key.lastUpdated)
         )
     }
 }
@@ -122,9 +125,11 @@ struct SpendSenseProvider: TimelineProvider {
 private func fmt(_ v: Double) -> String {
     let f = NumberFormatter()
     f.numberStyle = .currency
-    f.currencySymbol = "Rs."
+    // Default to LKR. If the main app later writes a currency preference into the shared
+    // defaults, you can read it here and set `currencyCode` accordingly.
+    f.currencyCode = "LKR"
     f.maximumFractionDigits = 0
-    return f.string(from: NSNumber(value: v)) ?? "Rs.\(Int(v))"
+    return f.string(from: NSNumber(value: v)) ?? "LKR \(Int(v))"
 }
 
 struct SmallWidgetView: View {
@@ -422,6 +427,12 @@ struct WidgetContent: View {
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.wTextSecondary)
                 .multilineTextAlignment(.center)
+
+            // Debug aid: if this stays "never", the widget is not reading shared app-group defaults.
+            let ts = entry.lastUpdated
+            Text(ts > 0 ? "Last sync: \(Date(timeIntervalSince1970: ts).formatted(date: .abbreviated, time: .shortened))" : "Last sync: never")
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundColor(.wTextTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

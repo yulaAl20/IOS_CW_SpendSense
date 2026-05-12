@@ -10,8 +10,14 @@ import WidgetKit
 
 struct WidgetDataStore {
 
-    static let suiteName = "group.com.yulaAl20.spendsense.app"
-    static var defaults: UserDefaults { UserDefaults(suiteName: suiteName) ?? .standard }
+    static let suiteName = "group.SpendSense.com"
+    static var defaults: UserDefaults {
+        guard let d = UserDefaults(suiteName: suiteName) else {
+            assertionFailure("[WidgetDataStore] Failed to open UserDefaults for suite: \(suiteName). Check App Group entitlements for BOTH targets.")
+            return .standard
+        }
+        return d
+    }
 
     private enum Key {
         static let todaySpent     = "widget_todaySpent"
@@ -25,6 +31,8 @@ struct WidgetDataStore {
         static let lastUpdated    = "widget_lastUpdated"
         static let monthlyIncome  = "widget_monthlyIncome"
         static let todayIncome    = "widget_todayIncome"
+        static let debugSuiteName  = "widget_debug_suiteName"
+        static let debugWriter     = "widget_debug_writer"
     }
 
     static func save(todaySpent: Double,
@@ -49,7 +57,15 @@ struct WidgetDataStore {
         d.set(monthlyIncome,   forKey: Key.monthlyIncome)
         d.set(todayIncome,     forKey: Key.todayIncome)
         d.set(Date().timeIntervalSince1970, forKey: Key.lastUpdated)
-        d.synchronize()
+        d.set(suiteName, forKey: Key.debugSuiteName)
+        d.set("app", forKey: Key.debugWriter)
+
+        // Ensure the widget is prompted to pull the latest snapshot.
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    static func lastUpdatedTimestamp() -> TimeInterval {
+        defaults.double(forKey: Key.lastUpdated)
     }
 
     static func load() -> (todaySpent: Double, monthlySpent: Double,
@@ -80,7 +96,6 @@ struct WidgetDataStore {
                     Key.monthlyIncome, Key.todayIncome] {
             d.removeObject(forKey: key)
         }
-        d.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
     }
 }

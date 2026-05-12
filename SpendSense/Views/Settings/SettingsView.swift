@@ -35,10 +35,11 @@ struct SettingsView: View {
     @State private var budgetWarningPercent: Double = 80.0
 
     // Accessibility
-    @State private var selectedCurrency: String      = "USD"
+    @AppStorage(CurrencyFormatter.currencyCodeDefaultsKey)
+    private var selectedCurrency: String = CurrencyFormatter.defaultCurrencyCode
     @State private var textSizeMultiplier: Double    = 1.0
 
-    private let currencies = ["USD", "EUR", "GBP", "LKR", "AUD", "CAD", "INR", "JPY", "SGD"]
+    private let currencies = ["LKR", "USD", "EUR", "GBP", "AUD", "CAD", "INR", "JPY", "SGD"]
     private var previewFontSize: CGFloat { CGFloat(14) * textSizeMultiplier }
 
     var body: some View {
@@ -301,7 +302,10 @@ struct SettingsView: View {
             Spacer()
             Menu {
                 ForEach(currencies, id: \.self) { c in
-                    Button(c) { selectedCurrency = c }
+                    Button(c) {
+                        selectedCurrency = c
+                        CurrencyFormatter.setCurrencyCode(c)
+                    }
                 }
             } label: {
                 HStack(spacing: 4) {

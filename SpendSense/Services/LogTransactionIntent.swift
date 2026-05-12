@@ -49,26 +49,19 @@ struct LogTransactionIntent: AppIntent {
     )
 
     @IntentParameter(title: "Amount") var amount: Double
-    @IntentParameter(title: "Select Category") var category: SpendingCategoryEntity?
-    @IntentParameter(title: "Or Type Category", description: "e.g. Food, Transport") var typedCategory: String?
+
+    @IntentParameter(
+        title: "Category",
+        requestValueDialog: IntentDialog("Which spending category is this for?")
+    )
+    var category: SpendingCategoryEntity
+
     @IntentParameter(title: "Note", default: "Logged via Siri") var note: String
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
 
-        var resolvedCategory: SpendingCategory? = nil
-        
-        if let typed = typedCategory, !typed.isEmpty {
-            resolvedCategory = SpendingCategory.allCases.first { 
-                $0.rawValue.lowercased().contains(typed.lowercased()) 
-            }
-        } else if let catEntity = category {
-            resolvedCategory = SpendingCategory(rawValue: catEntity.id)
-        }
-
-        guard let spendingCategory = resolvedCategory else {
-            return .result(dialog: "Sorry, I couldn't find that category.")
-        }
+        let spendingCategory = SpendingCategory(rawValue: category.id) ?? .other
 
         let context = PersistenceController.shared.container.viewContext
         let risk = ImpulseRiskPredictor.shared.predictRisk(
@@ -125,26 +118,19 @@ struct AddExpenseIntent: AppIntent {
     static var openAppWhenRun: Bool = false
 
     @IntentParameter(title: "Amount") var amount: Double
-    @IntentParameter(title: "Select Category") var category: SpendingCategoryEntity?
-    @IntentParameter(title: "Or Type Category", description: "e.g. Food") var typedCategory: String?
+
+    @IntentParameter(
+        title: "Category",
+        requestValueDialog: IntentDialog("Which category does this expense belong to?")
+    )
+    var category: SpendingCategoryEntity
+
     @IntentParameter(title: "Note", default: "Quick expense") var note: String
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
 
-        var resolvedCategory: SpendingCategory? = nil
-        
-        if let typed = typedCategory, !typed.isEmpty {
-            resolvedCategory = SpendingCategory.allCases.first { 
-                $0.rawValue.lowercased().contains(typed.lowercased()) 
-            }
-        } else if let catEntity = category {
-            resolvedCategory = SpendingCategory(rawValue: catEntity.id)
-        }
-
-        guard let spendingCategory = resolvedCategory else {
-            return .result(dialog: "Unknown category. Please try again.")
-        }
+        let spendingCategory = SpendingCategory(rawValue: category.id) ?? .other
 
         let context = PersistenceController.shared.container.viewContext
         let store   = CoreDataStore(context: context)

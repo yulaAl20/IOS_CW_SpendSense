@@ -84,6 +84,8 @@ struct TransactionsView: View {
                 Text("Total: \(prefix)\(vm.formatCurrency(abs(totalFiltered)))")
                     .font(SSFont.mono(13, weight: .semibold))
                     .foregroundColor(totalFiltered < 0 ? .ssSuccess : (totalFiltered > 0 ? .ssDanger : .ssTextPrimary))
+                    .accessibilityLabel("Total")
+                    .accessibilityValue("\(prefix)\(vm.accessibilityCurrency(abs(totalFiltered)))")
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)

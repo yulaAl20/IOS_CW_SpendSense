@@ -394,17 +394,22 @@ struct BehavioralInsights: View {
             ))
         }
 
-        // Savings projection
+        // Savings projection (extrapolated to end of month)
         if vm.userProfile.monthlyIncome > 0 {
-            let savingsPct = (vm.userProfile.monthlyIncome - vm.totalSpentThisMonth) / vm.userProfile.monthlyIncome * 100
+            let daysInMonth = 30.0
+            let projectedSpend = dayOfMonth > 0
+                ? (vm.totalSpentThisMonth / dayOfMonth) * daysInMonth
+                : 0
+            let projectedSavings = vm.userProfile.monthlyIncome - projectedSpend
+            let savingsPct = projectedSavings / vm.userProfile.monthlyIncome * 100
             let goalPct = vm.userProfile.savingsGoalPercent
             cards.append(InsightCard(
                 icon: "arrow.up.right.circle.fill",
                 iconColor: savingsPct >= goalPct ? .ssSuccess : .ssWarning,
                 title: "Savings Projection",
                 body: savingsPct >= goalPct
-                    ? "You're on track to save \(Int(savingsPct))% this month — above your \(Int(goalPct))% goal! 🎉"
-                    : "You're projected to save \(Int(max(0, savingsPct)))% this month — below your \(Int(goalPct))% target. Try cutting non-essential spending.",
+                    ? "At this pace you'll save ~\(Int(savingsPct))% by month-end — above your \(Int(goalPct))% goal! 🎉"
+                    : "At this pace you'll save ~\(Int(max(0, savingsPct)))% by month-end — below your \(Int(goalPct))% target. Try cutting non-essential spending.",
                 type: savingsPct >= goalPct ? .positive : .warning
             ))
         }

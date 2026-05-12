@@ -136,18 +136,46 @@ struct OnboardingView: View {
             showAccountError  = false
 
             Task { @MainActor in
+                defer {
+                    // Ensure we never leave the UI stuck in a loading state.
+                    isCreatingAccount = false
+                }
                 do {
-                    let uid = try await FirebaseService.shared.signUp(
-                        email: vm.email, password: vm.password)
+                    let uid = try await withTimeout(seconds: 20) {
+                        try await FirebaseService.shared.signUp(
+                            email: vm.email,
+                            password: vm.password
+                        )
+                    }
                     finishOnboarding(uid: uid)
                 } catch {
-                    isCreatingAccount = false
                     accountErrorMsg   = error.localizedDescription
                     showAccountError  = true
+                    print("[Onboarding] Sign-up failed: \(error)")
                 }
             }
         } else {
             vm.next()
+        }
+    }
+
+    /// Simple timeout wrapper so Auth calls can't hang forever (e.g., misconfigured Firebase/network issues).
+    private func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async throws -> T) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask {
+                try await operation()
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                throw NSError(
+                    domain: "SpendSense",
+                    code: -1001,
+                    userInfo: [NSLocalizedDescriptionKey: "Request timed out. Please check your internet connection and try again."]
+                )
+            }
+            let value = try await group.next()!
+            group.cancelAll()
+            return value
         }
     }
 
@@ -157,7 +185,6 @@ struct OnboardingView: View {
         spendVM.saveOnboardingProfile(profile)
         appState.pendingEmail       = vm.email
         appState.pendingFirebaseUID = uid
-        isCreatingAccount           = false
         appState.completeOnboarding()
     }
 }

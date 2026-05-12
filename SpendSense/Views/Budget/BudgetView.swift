@@ -91,7 +91,8 @@ struct GlobalBudgetCard: View {
         switch period {
         case .daily:   return vm.totalSpentToday
         case .weekly:  return vm.transactions
-            .filter { Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear) }
+            .filter { !$0.isSimulated && !$0.isIncome &&
+                      Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear) }
             .reduce(0) { $0 + $1.amount }
         case .monthly: return vm.totalSpentThisMonth
         }
@@ -127,6 +128,8 @@ struct GlobalBudgetCard: View {
                             .foregroundColor(.ssTextPrimary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
+                            .accessibilityLabel("Spent")
+                            .accessibilityValue(vm.accessibilityCurrency(spent))
                     }
 
                     Spacer(minLength: 12)
@@ -140,6 +143,8 @@ struct GlobalBudgetCard: View {
                             .foregroundColor(riskColor)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
+                            .accessibilityLabel("Remaining")
+                            .accessibilityValue(vm.accessibilityCurrency(max(0, limit - spent)))
                     }
                 }
 
@@ -151,6 +156,8 @@ struct GlobalBudgetCard: View {
                     Text(vm.formatCurrency(limit))
                         .font(SSFont.mono(12, weight: .semibold))
                         .foregroundColor(.ssTextSecondary)
+                        .accessibilityLabel("Limit")
+                        .accessibilityValue(vm.accessibilityCurrency(limit))
                 }
 
                 // Progress bar
